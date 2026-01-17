@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { Invoice } from "@/shared/types/invoice.types";
+import { InvoiceSchema } from "@/shared/types/invoice.schema";
 
 interface InvoiceState {
     invoices: Invoice[];
@@ -34,9 +35,22 @@ export const useInvoiceStore = create<InvoiceState>((set: any, get: any) => ({
     })),
 
     updateInvoice: (id: string, updates: Partial<Invoice>) => set((state: InvoiceState) => ({
-        invoices: state.invoices.map((inv: Invoice) =>
-            inv.id === id ? { ...inv, ...updates, updatedAt: new Date().toISOString() } : inv
-        )
+        invoices: state.invoices.map((inv: Invoice) => {
+            if (inv.id !== id) return inv;
+
+            const updated = { ...inv, ...updates, updatedAt: new Date().toISOString() };
+
+            // Validar con Zod
+            const validation = InvoiceSchema.safeParse(updated);
+
+            return {
+                ...updated,
+                hasErrors: !validation.success,
+                errors: !validation.success
+                    ? validation.error.flatten().fieldErrors as any
+                    : {}
+            };
+        })
     })),
 
     setSelectedInvoiceId: (id: string | null) => set({ selectedInvoiceId: id }),

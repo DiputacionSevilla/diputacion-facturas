@@ -42,8 +42,9 @@ export async function processFileWithOCR(file: File): Promise<Partial<Invoice>> 
         }
 
         const worker = await createWorker('spa');
-        // @ts-ignore - Bypassing type mismatch between Browser and Node environments during build
-        const { data: { text } } = await worker.recognize(imageData);
+        // Usamos doble cast (unknown -> any) para evitar el error de tipos en el build de Vercel 
+        // sin romper la funcionalidad en el cliente donde imageData es un formato válido.
+        const { data: { text } } = await worker.recognize(imageData as unknown as any);
         await worker.terminate();
 
         if (!text || text.trim().length === 0) {

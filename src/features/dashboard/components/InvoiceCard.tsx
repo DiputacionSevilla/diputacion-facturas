@@ -20,7 +20,7 @@ export function InvoiceCard({ invoice }: Props) {
         <div
             onClick={() => setSelectedInvoiceId(invoice.id)}
             className={cn(
-                "bg-white dark:bg-slate-900 border-l-4 border border-slate-200 dark:border-slate-800 rounded shadow-sm overflow-hidden transition-all cursor-pointer",
+                "bg-white dark:bg-slate-900 border-l-4 border border-slate-200 dark:border-slate-800 rounded shadow-sm overflow-hidden transition-all cursor-pointer animate-invoice-entry",
                 invoice.hasErrors ? "border-l-accent-red" : "border-l-accent-green",
                 isSelected && "ring-2 ring-primary/20 bg-slate-50 dark:bg-slate-800/50"
             )}
@@ -31,29 +31,47 @@ export function InvoiceCard({ invoice }: Props) {
                     <div className="col-span-1">
                         <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Nº Factura</label>
                         <input
-                            className={cn("editable-input", invoice.hasErrors && !invoice.invoiceNumber && "border-red-300 dark:border-red-900")}
+                            className={cn(
+                                "editable-input",
+                                invoice.errors?.invoiceNumber && "border-accent-red dark:border-red-900 focus:ring-accent-red"
+                            )}
                             type="text"
                             value={invoice.invoiceNumber}
                             onChange={(e) => handleChange("invoiceNumber", e.target.value)}
                         />
+                        {invoice.errors?.invoiceNumber && (
+                            <span className="text-[7px] text-accent-red font-bold mt-0.5 block">{invoice.errors.invoiceNumber}</span>
+                        )}
                     </div>
                     <div className="col-span-1">
                         <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Fecha</label>
                         <input
-                            className="editable-input"
+                            className={cn(
+                                "editable-input",
+                                invoice.errors?.invoiceDate && "border-accent-red dark:border-red-900 focus:ring-accent-red"
+                            )}
                             type="text"
                             value={invoice.invoiceDate}
                             onChange={(e) => handleChange("invoiceDate", e.target.value)}
                         />
+                        {invoice.errors?.invoiceDate && (
+                            <span className="text-[7px] text-accent-red font-bold mt-0.5 block">{invoice.errors.invoiceDate}</span>
+                        )}
                     </div>
                     <div className="col-span-1">
                         <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">CIF/NIF</label>
                         <input
-                            className="editable-input"
+                            className={cn(
+                                "editable-input",
+                                invoice.errors?.supplierNIF && "border-accent-red dark:border-red-900 focus:ring-accent-red"
+                            )}
                             type="text"
                             value={invoice.supplierNIF}
                             onChange={(e) => handleChange("supplierNIF", e.target.value)}
                         />
+                        {invoice.errors?.supplierNIF && (
+                            <span className="text-[7px] text-accent-red font-bold mt-0.5 block">{invoice.errors.supplierNIF}</span>
+                        )}
                     </div>
                     <div className="col-span-1 md:col-span-1">
                         <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Razón Social</label>
@@ -68,12 +86,18 @@ export function InvoiceCard({ invoice }: Props) {
                         <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Importe Total</label>
                         <div className="relative">
                             <input
-                                className="editable-input font-bold text-brand-green pr-4"
+                                className={cn(
+                                    "editable-input font-bold text-brand-green pr-4",
+                                    invoice.errors?.totalAmount && "border-accent-red dark:border-red-900 focus:ring-accent-red text-accent-red"
+                                )}
                                 type="text"
                                 value={invoice.totalAmount}
                                 onChange={(e) => handleChange("totalAmount", parseFloat(e.target.value) || 0)}
                             />
                             <span className="absolute right-2 top-1 text-[10px] text-brand-green">€</span>
+                            {invoice.errors?.totalAmount && (
+                                <span className="text-[7px] text-accent-red font-bold mt-0.5 block">{invoice.errors.totalAmount}</span>
+                            )}
                         </div>
                     </div>
                 </div>
