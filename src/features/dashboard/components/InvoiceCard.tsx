@@ -1,0 +1,123 @@
+"use client";
+
+import { Invoice } from "@/shared/types/invoice.types";
+import { cn } from "@/shared/lib/utils";
+import { useInvoiceStore } from "../store/useInvoiceStore";
+
+interface Props {
+    invoice: Invoice;
+}
+
+export function InvoiceCard({ invoice }: Props) {
+    const { updateInvoice, selectedInvoiceId, setSelectedInvoiceId } = useInvoiceStore();
+    const isSelected = selectedInvoiceId === invoice.id;
+
+    const handleChange = (field: keyof Invoice, value: any) => {
+        updateInvoice(invoice.id, { [field]: value });
+    };
+
+    return (
+        <div
+            onClick={() => setSelectedInvoiceId(invoice.id)}
+            className={cn(
+                "bg-white dark:bg-slate-900 border-l-4 border border-slate-200 dark:border-slate-800 rounded shadow-sm overflow-hidden transition-all cursor-pointer",
+                invoice.hasErrors ? "border-l-accent-red" : "border-l-accent-green",
+                isSelected && "ring-2 ring-primary/20 bg-slate-50 dark:bg-slate-800/50"
+            )}
+        >
+            <div className="p-3 space-y-3">
+                {/* Row 1: Key Metadata */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                    <div className="col-span-1">
+                        <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Nº Factura</label>
+                        <input
+                            className={cn("editable-input", invoice.hasErrors && !invoice.invoiceNumber && "border-red-300 dark:border-red-900")}
+                            type="text"
+                            value={invoice.invoiceNumber}
+                            onChange={(e) => handleChange("invoiceNumber", e.target.value)}
+                        />
+                    </div>
+                    <div className="col-span-1">
+                        <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Fecha</label>
+                        <input
+                            className="editable-input"
+                            type="text"
+                            value={invoice.invoiceDate}
+                            onChange={(e) => handleChange("invoiceDate", e.target.value)}
+                        />
+                    </div>
+                    <div className="col-span-1">
+                        <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">CIF/NIF</label>
+                        <input
+                            className="editable-input"
+                            type="text"
+                            value={invoice.supplierNIF}
+                            onChange={(e) => handleChange("supplierNIF", e.target.value)}
+                        />
+                    </div>
+                    <div className="col-span-1 md:col-span-1">
+                        <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Razón Social</label>
+                        <input
+                            className="editable-input"
+                            type="text"
+                            value={invoice.supplierName}
+                            onChange={(e) => handleChange("supplierName", e.target.value)}
+                        />
+                    </div>
+                    <div className="col-span-2 md:col-span-1">
+                        <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Importe Total</label>
+                        <div className="relative">
+                            <input
+                                className="editable-input font-bold text-brand-green pr-4"
+                                type="text"
+                                value={invoice.totalAmount}
+                                onChange={(e) => handleChange("totalAmount", parseFloat(e.target.value) || 0)}
+                            />
+                            <span className="absolute right-2 top-1 text-[10px] text-brand-green">€</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Row 2: Details */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded ml-1 border-l-2 border-slate-200 dark:border-slate-700">
+                    <div className="col-span-2 md:col-span-1">
+                        <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Concepto Resumen</label>
+                        <input
+                            className="editable-input"
+                            type="text"
+                            value={invoice.concept}
+                            onChange={(e) => handleChange("concept", e.target.value)}
+                        />
+                    </div>
+                    <div className="col-span-1">
+                        <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Impuestos (IVA)</label>
+                        <input
+                            className="editable-input"
+                            type="text"
+                            value={invoice.vatAmount}
+                            onChange={(e) => handleChange("vatAmount", parseFloat(e.target.value) || 0)}
+                        />
+                    </div>
+                    <div className="col-span-1">
+                        <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Base Imponible</label>
+                        <input
+                            className="editable-input"
+                            type="text"
+                            value={invoice.baseAmount}
+                            onChange={(e) => handleChange("baseAmount", parseFloat(e.target.value) || 0)}
+                        />
+                    </div>
+                    <div className="col-span-2 md:col-span-1">
+                        <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Área Destino</label>
+                        <input
+                            className="editable-input"
+                            type="text"
+                            value={invoice.description}
+                            onChange={(e) => handleChange("description", e.target.value)}
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

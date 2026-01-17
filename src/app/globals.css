@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased font-inter bg-background-light text-slate-800 dark:bg-background-dark dark:text-slate-200;
+  }
+}
+
+@layer components {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+  }
+
+  .editable-input {
+    @apply w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-xs py-1 px-2 rounded focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-all outline-none;
+  }
+}

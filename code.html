@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PaperToSic@l - Validación Editable</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2b468b",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                        "brand-green": "#2c7a4b",
+                        "accent-green": "#22c55e",
+                        "accent-red": "#ef4444",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                },
+            },
+        };
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body { font-family: 'Inter', sans-serif; }
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .editable-input {
+            @apply w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-xs py-1 px-2 rounded focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-all;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 min-h-screen flex flex-col overflow-x-hidden">
+<header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 sticky top-0 z-50">
+<div class="max-w-7xl mx-auto flex justify-between items-center gap-2">
+<div class="flex flex-col">
+<h1 class="text-xl font-bold text-brand-green flex flex-wrap items-center">
+                PaperToSic@l <span class="text-[8px] font-normal text-slate-400 ml-1 tracking-widest uppercase">@AI-Powered</span>
+</h1>
+<span class="text-[9px] text-slate-500 font-bold uppercase truncate">Diputación Provincial</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400" onclick="toggleDarkMode()">
+<span class="material-symbols-outlined text-xl">dark_mode</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden border border-slate-300 dark:border-slate-600">
+<span class="material-symbols-outlined text-slate-500">person</span>
+</div>
+</div>
+</div>
+</header>
+<div class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-2">
+<div class="max-w-7xl mx-auto flex justify-between items-center">
+<h2 class="text-[10px] font-bold text-brand-green tracking-wide">VALIDACIÓN E INSCRIPCIÓN</h2>
+<span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">MODO EDICIÓN</span>
+</div>
+</div>
+<main class="flex-1 w-full p-2 lg:p-4 space-y-4">
+<div class="bg-white dark:bg-slate-900 p-3 rounded shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="flex gap-2">
+<div class="flex-1">
+<input class="w-full h-9 border-slate-300 dark:border-slate-700 dark:bg-slate-800 rounded text-xs px-3" placeholder="Proveedor / CIF..." type="text"/>
+</div>
+<button class="bg-primary text-white px-3 rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-lg">search</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+<div class="lg:col-span-2 space-y-4">
+<div class="flex justify-between items-center px-1">
+<div class="flex gap-3 text-[10px] font-bold">
+<div class="flex items-center gap-1">
+<span class="w-3 h-3 bg-accent-green rounded-full"></span>
+<span class="text-slate-500">OK</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-3 h-3 bg-accent-red rounded-full"></span>
+<span class="text-slate-500">Error</span>
+</div>
+</div>
+<div class="text-[10px] text-slate-400 italic">Doble fila por registro</div>
+</div>
+<div class="space-y-3">
+<div class="bg-white dark:bg-slate-900 border-l-4 border-l-accent-green border border-slate-200 dark:border-slate-800 rounded shadow-sm overflow-hidden">
+<div class="p-3 space-y-3">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+<div class="col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Nº Factura</label>
+<input class="editable-input" type="text" value="EXP-2024-001"/>
+</div>
+<div class="col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Fecha</label>
+<input class="editable-input" type="text" value="12/01/2024"/>
+</div>
+<div class="col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">CIF/NIF</label>
+<input class="editable-input" type="text" value="B41223344"/>
+</div>
+<div class="col-span-1 md:col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Razón Social</label>
+<input class="editable-input" type="text" value="Suministros Globales"/>
+</div>
+<div class="col-span-2 md:col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Importe Total</label>
+<input class="editable-input font-bold text-brand-green" type="text" value="1.250,50 €"/>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded ml-1 border-l-2 border-slate-200 dark:border-slate-700">
+<div class="col-span-2 md:col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Concepto Resumen</label>
+<input class="editable-input" type="text" value="Material de oficina trimestral"/>
+</div>
+<div class="col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Impuestos</label>
+<input class="editable-input" type="text" value="210,08 €"/>
+</div>
+<div class="col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Descuento</label>
+<input class="editable-input" type="text" value="0,00 €"/>
+</div>
+<div class="col-span-2 md:col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Área Destino</label>
+<input class="editable-input" type="text" value="Intervención General"/>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 border-l-4 border-l-accent-red border border-slate-200 dark:border-slate-800 rounded shadow-sm overflow-hidden">
+<div class="p-3 space-y-3">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+<div class="col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Nº Factura</label>
+<input class="editable-input border-red-300 dark:border-red-900" type="text" value="F-2024-99"/>
+</div>
+<div class="col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Fecha</label>
+<input class="editable-input" type="text" value="15/01/2024"/>
+</div>
+<div class="col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">CIF/NIF</label>
+<input class="editable-input" type="text" value="A91008877"/>
+</div>
+<div class="col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Razón Social</label>
+<input class="editable-input" type="text" value="Infraestructuras S.A."/>
+</div>
+<div class="col-span-2 md:col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Importe Total</label>
+<input class="editable-input font-bold text-brand-green" type="text" value="45.000,00 €"/>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded ml-1 border-l-2 border-slate-200 dark:border-slate-700">
+<div class="col-span-2 md:col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Concepto Resumen</label>
+<input class="editable-input" type="text" value="Mantenimiento vial zona norte"/>
+</div>
+<div class="col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Impuestos</label>
+<input class="editable-input" type="text" value="7.809,92 €"/>
+</div>
+<div class="col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Descuento</label>
+<input class="editable-input" type="text" value="500,00 €"/>
+</div>
+<div class="col-span-2 md:col-span-1">
+<label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Área Destino</label>
+<input class="editable-input" type="text" value="Obras Públicas"/>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 border-l-4 border-l-slate-300 border border-slate-200 dark:border-slate-800 rounded shadow-sm overflow-hidden">
+<div class="p-3 space-y-3">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+<div class="col-span-1"><label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Nº Factura</label><input class="editable-input" type="text" value="FAC/2026/12"/></div>
+<div class="col-span-1"><label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Fecha</label><input class="editable-input" type="text" value="10/01/2024"/></div>
+<div class="col-span-1"><label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">CIF/NIF</label><input class="editable-input" type="text" value="B12345678"/></div>
+<div class="col-span-1"><label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Razón Social</label><input class="editable-input" type="text" value="Consultoría Técnica"/></div>
+<div class="col-span-2 md:col-span-1"><label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Importe Total</label><input class="editable-input font-bold text-brand-green" type="text" value="340,20 €"/></div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded ml-1 border-l-2 border-slate-200 dark:border-slate-700">
+<div class="col-span-2 md:col-span-1"><label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Concepto Resumen</label><input class="editable-input" type="text" value="Asesoría legal Enero"/></div>
+<div class="col-span-1"><label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Impuestos</label><input class="editable-input" type="text" value="59,04 €"/></div>
+<div class="col-span-1"><label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Descuento</label><input class="editable-input" type="text" value="0,00 €"/></div>
+<div class="col-span-2 md:col-span-1"><label class="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Área Destino</label><input class="editable-input" type="text" value="Secretaría General"/></div>
+</div>
+</div>
+</div>
+</div>
+<button class="bg-primary text-white p-4 rounded-sm shadow-lg flex items-center gap-4 hover:brightness-110 transition group w-full justify-center">
+<div class="border-2 border-white/30 rounded p-1 group-hover:border-white/60 transition">
+<span class="material-symbols-outlined text-xl">save</span>
+</div>
+<div class="text-left">
+<div class="font-bold text-sm leading-tight uppercase">GRABAR EN SICAL</div>
+<div class="text-[9px] opacity-80 uppercase tracking-tighter">CONTABILIZAR FACTURAS EDITADAS</div>
+</div>
+</button>
+</div>
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded shadow-sm flex flex-col h-[400px] lg:h-auto lg:sticky lg:top-[120px]">
+<div class="p-3 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+<div class="flex items-center gap-2 text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase">
+<span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+                    Miniatura Factura
+                </div>
+<div class="flex items-center gap-3 text-slate-400">
+<span class="material-symbols-outlined text-sm cursor-pointer hover:text-slate-600">visibility</span>
+<span class="material-symbols-outlined text-sm cursor-pointer hover:text-slate-600">download</span>
+</div>
+</div>
+<div class="flex-1 bg-slate-100 dark:bg-slate-950 p-4 flex flex-col items-center justify-center overflow-auto custom-scrollbar">
+<div class="w-full max-w-[180px] aspect-[1/1.414] bg-white dark:bg-slate-800 shadow-lg p-3 rounded-sm relative border border-slate-200 dark:border-slate-700">
+<div class="flex justify-between items-start mb-4">
+<div class="w-5 h-5 bg-green-50 dark:bg-green-900/30 rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-brand-green">apartment</span>
+</div>
+<div class="text-right">
+<div class="h-1 w-8 bg-slate-200 dark:bg-slate-700 rounded-full mb-1"></div>
+<div class="h-1 w-10 bg-brand-green/30 rounded-full"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="h-1 w-full bg-slate-100 dark:bg-slate-700 rounded-full"></div>
+<div class="h-1 w-2/3 bg-slate-100 dark:bg-slate-700 rounded-full"></div>
+<div class="mt-4 pt-4 border-t border-slate-50 dark:border-slate-700 space-y-1">
+<div class="flex justify-between">
+<div class="h-1 w-8 bg-slate-50 dark:bg-slate-700/50 rounded-full"></div>
+<div class="h-1 w-6 bg-slate-50 dark:bg-slate-700/50 rounded-full"></div>
+</div>
+<div class="flex justify-between">
+<div class="h-1 w-8 bg-slate-50 dark:bg-slate-700/50 rounded-full"></div>
+<div class="h-1 w-6 bg-slate-50 dark:bg-slate-700/50 rounded-full"></div>
+</div>
+<div class="flex justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+<div class="h-1 w-10 bg-slate-200 dark:bg-slate-600 rounded-full"></div>
+<div class="h-1 w-8 bg-brand-green/40 rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="absolute bottom-2 right-2 opacity-10">
+<span class="material-symbols-outlined text-3xl">verified</span>
+</div>
+</div>
+<p class="mt-4 text-[9px] text-slate-400 font-medium uppercase tracking-widest">Previsualización IA</p>
+</div>
+</div>
+</div>
+</main>
+<footer class="p-4 text-center text-[9px] text-slate-400 uppercase tracking-widest font-medium border-t border-slate-200 dark:border-slate-800">
+    PaperToSic@l Validation System © 2024
+</footer>
+
+</body></html>
