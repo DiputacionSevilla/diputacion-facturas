@@ -42,6 +42,7 @@ export async function processFileWithOCR(file: File): Promise<Partial<Invoice>> 
         }
 
         const worker = await createWorker('spa');
+        // @ts-ignore - Bypassing type mismatch between Browser and Node environments during build
         const { data: { text } } = await worker.recognize(imageData);
         await worker.terminate();
 
