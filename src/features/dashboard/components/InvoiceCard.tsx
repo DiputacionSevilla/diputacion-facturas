@@ -3,14 +3,18 @@
 import { Invoice } from "@/shared/types/invoice.types";
 import { cn } from "@/shared/lib/utils";
 import { useInvoiceStore } from "../store/useInvoiceStore";
+import { Trash2, AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { Modal } from "@/shared/components/ui/Modal";
 
 interface Props {
     invoice: Invoice;
 }
 
 export function InvoiceCard({ invoice }: Props) {
-    const { updateInvoice, selectedInvoiceId, setSelectedInvoiceId, toggleSelectInvoice } = useInvoiceStore();
+    const { updateInvoice, selectedInvoiceId, setSelectedInvoiceId, toggleSelectInvoice, deleteInvoice } = useInvoiceStore();
     const isSelected = selectedInvoiceId === invoice.id;
+    const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
     const handleChange = (field: keyof Invoice, value: any) => {
         updateInvoice(invoice.id, { [field]: value });
@@ -33,7 +37,7 @@ export function InvoiceCard({ invoice }: Props) {
                         toggleSelectInvoice(invoice.id);
                     }}
                     className={cn(
-                        "w-10 flex items-center justify-center border-r border-slate-200 dark:border-slate-800 transition-colors",
+                        "w-12 flex flex-col items-center justify-center gap-4 border-r border-slate-200 dark:border-slate-800 transition-colors",
                         invoice.selected ? "bg-brand-green/10" : "bg-white dark:bg-slate-900"
                     )}
                 >
@@ -43,6 +47,18 @@ export function InvoiceCard({ invoice }: Props) {
                         checked={!!invoice.selected}
                         onChange={() => { }} // Handle handled by parent div for larger click area
                     />
+
+                    {/* Trash Icon */}
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsConfirmingDelete(true);
+                        }}
+                        className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-300 hover:text-red-500 transition-colors group"
+                        title="Eliminar factura"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
                 </div>
 
                 <div className="p-3 space-y-3 flex-1 overflow-hidden">
@@ -163,6 +179,43 @@ export function InvoiceCard({ invoice }: Props) {
                     </div>
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            <Modal
+                isOpen={isConfirmingDelete}
+                onClose={() => setIsConfirmingDelete(false)}
+                title="Confirmar eliminación"
+            >
+                <div className="p-6">
+                    <div className="flex flex-col items-center text-center">
+                        <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-4">
+                            <AlertTriangle className="w-6 h-6 text-red-600" />
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2 uppercase">¿Eliminar esta factura?</h3>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-8 max-w-[280px]">
+                            Esta acción eliminará <span className="font-bold text-slate-700 dark:text-slate-200">"{invoice.pdfFileName}"</span> de forma permanente de esta lista.
+                        </p>
+                    </div>
+
+                    <div className="flex gap-3 justify-center">
+                        <button
+                            onClick={() => setIsConfirmingDelete(false)}
+                            className="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all uppercase"
+                        >
+                            Volver
+                        </button>
+                        <button
+                            onClick={() => {
+                                deleteInvoice(invoice.id);
+                                setIsConfirmingDelete(false);
+                            }}
+                            className="flex-1 px-4 py-2 bg-red-600 text-white rounded text-[10px] font-bold hover:bg-red-700 transition-all shadow-md uppercase"
+                        >
+                            Borrar
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

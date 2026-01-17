@@ -17,6 +17,7 @@ interface InvoiceState {
     setIsProcessing: (isProcessing: boolean) => void;
     toggleSelectInvoice: (id: string) => void;
     toggleSelectAll: (selected: boolean) => void;
+    deleteInvoice: (id: string) => void;
 
     // Selectors
     getSelectedInvoice: () => Invoice | undefined;
@@ -69,6 +70,11 @@ export const useInvoiceStore = create<InvoiceState>((set: any, get: any) => ({
 
     toggleSelectAll: (selected: boolean) => set((state: InvoiceState) => ({
         invoices: state.invoices.map((inv: Invoice) => ({ ...inv, selected }))
+    })),
+
+    deleteInvoice: (id: string) => set((state: InvoiceState) => ({
+        invoices: state.invoices.filter((inv: Invoice) => inv.id !== id),
+        selectedInvoiceId: state.selectedInvoiceId === id ? null : state.selectedInvoiceId
     })),
 
     getSelectedInvoice: () => {
