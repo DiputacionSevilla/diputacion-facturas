@@ -2,6 +2,7 @@
 
 import { Moon, Sun, User } from "lucide-react";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 export function Header() {
     const [isDark, setIsDark] = useState(false);
@@ -20,16 +21,27 @@ export function Header() {
     return (
         <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 lg:px-6 py-4 sticky top-0 z-50">
             <div className="w-full flex justify-between items-center gap-2">
-                <div className="flex flex-col">
-                    <h1 className="text-xl font-bold text-brand-green flex flex-wrap items-center">
-                        PaperToSic@l{" "}
-                        <span className="text-[8px] font-normal text-slate-400 ml-1 tracking-widest uppercase">
-                            @AI-Powered
+                <div className="flex items-center gap-3">
+                    <div className="relative w-10 h-10 flex-shrink-0">
+                        <Image
+                            src="/logo-dipu.png"
+                            alt="Logo Diputación de Sevilla"
+                            fill
+                            className="object-contain"
+                            priority
+                        />
+                    </div>
+                    <div className="flex flex-col">
+                        <h1 className="text-xl font-bold text-brand-green flex flex-wrap items-center">
+                            PaperToSic@l{" "}
+                            <span className="text-[8px] font-normal text-slate-400 ml-1 tracking-widest uppercase">
+                                @AI-Powered
+                            </span>
+                        </h1>
+                        <span className="text-[9px] text-slate-500 font-bold uppercase truncate">
+                            Diputación Provincial de Sevilla
                         </span>
-                    </h1>
-                    <span className="text-[9px] text-slate-500 font-bold uppercase truncate">
-                        Diputación Provincial de Sevilla
-                    </span>
+                    </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <button
