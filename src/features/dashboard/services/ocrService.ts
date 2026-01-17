@@ -1,30 +1,73 @@
-import { Invoice } from "@/shared/types/invoice.types";
+import { createWorker } from 'tesseract.js';
+import { Invoice } from '@/shared/types/invoice.types';
 
-/**
- * Simulates OCR extraction. In a real app, this would use Tesseract.js 
- * or an external API and then parse the text with regex or LLM.
- */
-export async function simulateOCR(file: File): Promise<Partial<Invoice>> {
-    // Artificial delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+export async function processFileWithOCR(file: File): Promise<Partial<Invoice>> {
+    const worker = await createWorker('spa'); // Lenguaje español
 
-    const randomId = Math.floor(Math.random() * 1000).toString();
-    const isError = Math.random() > 0.8;
+    // Tesseract.js handles images well. For PDF, in a production app we would 
+    // convert PDF to image first using pdf.js. 
+    // For this prototype, if it's a PDF we'll try to process it (Tesseract.js 
+    // has some limited PDF support depending on the build).
 
-    return {
-        supplierName: isError ? "" : "Suministros Globales S.L.",
-        supplierNIF: isError ? "ERROR-NIF" : "B41223344",
-        invoiceNumber: `EXP-2024-${randomId.padStart(3, '0')}`,
-        invoiceDate: new Date().toLocaleDateString('es-ES'),
-        totalAmount: 1250.50,
-        baseAmount: 1033.47,
-        vatAmount: 217.03,
-        vatRate: 21,
-        description: "Material de oficina y fungibles",
-        concept: "Consumibles Trimestre 1",
-        status: isError ? 'pending' : 'pending', // Both pending but one with errors
-        hasErrors: isError,
-        receiverName: "Diputación de Sevilla",
-        receiverNIF: "P4100000I",
+    const { data: { text } } = await worker.recognize(file);
+    await worker.terminate();
+
+    return parseInvoiceText(text);
+}
+
+function parseInvoiceText(text: string): Partial<Invoice> {
+    const data: Partial<Invoice> = {
+        description: "Extraído mediante OCR",
+        concept: "Factura procesada automáticamente",
     };
+
+    // 1. Extraer NIF/CIF (B12345678, A12345678, 12345678A)
+    const nifRegex = /([ABCDEFGHJKLMNPQRSUVW][0-9]{8}|[0-9]{8}[A-Z])/gi;
+    const nifs = text.match(nifRegex);
+    if (nifs && nifs.length > 0) {
+        // El primero suele ser el emisor, el segundo el receptor (Diputación suele estar fija)
+        data.supplierNIF = nifs[0].toUpperCase();
+    }
+
+    // 2. Extraer Importe Total (Busca números con coma/punto cerca de palabras clave)
+    // Ejemplo: Total Factura 1.250,45
+    const totalRegex = /(?:total|importe|total\s+factura|a\s+pagar)[\s:]*([0-9]{1,3}(?:\.[0-9]{3})*(?:,[0-9]{2}))/gi;
+    const totals = text.matchAll(totalRegex);
+    let maxTotal = 0;
+    for (const match of totals) {
+        const value = parseFloat(match[1].replace('.', '').replace(',', '.'));
+        if (value > maxTotal) maxTotal = value;
+    }
+    if (maxTotal > 0) {
+        data.totalAmount = maxTotal;
+        data.baseAmount = +(maxTotal / 1.21).toFixed(2);
+        data.vatAmount = +(maxTotal - data.baseAmount).toFixed(2);
+        data.vatRate = 21;
+    }
+
+    // 3. Extraer Fecha (DD/MM/YYYY)
+    const dateRegex = /(\d{2})[\/\- ](\d{2})[\/\- ](\d{4})/g;
+    const dates = text.match(dateRegex);
+    if (dates && dates.length > 0) {
+        data.invoiceDate = dates[0];
+    }
+
+    // 4. Extraer Número de Factura
+    const numberRegex = /(?:factura|nº|numero|num|fact\.)[\s:]*([A-Z0-9\-\/]{3,})/gi;
+    const numbers = text.matchAll(numberRegex);
+    for (const match of numbers) {
+        if (match[1] && !/total|fecha|nif/i.test(match[1])) {
+            data.invoiceNumber = match[1];
+            break;
+        }
+    }
+
+    // Intentar sacar el nombre del proveedor (Suele estar al principio)
+    const lines = text.split('\n').filter(l => l.trim().length > 5);
+    if (lines.length > 0) {
+        // Normalmente las primeras líneas contienen el nombre de la empresa
+        data.supplierName = lines[0].trim();
+    }
+
+    return data;
 }

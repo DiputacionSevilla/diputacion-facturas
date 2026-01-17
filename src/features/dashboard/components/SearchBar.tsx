@@ -4,7 +4,7 @@ import { Search, Upload, Loader2 } from "lucide-react";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { useInvoiceStore } from "../store/useInvoiceStore";
-import { simulateOCR } from "../services/ocrService";
+import { processFileWithOCR } from "../services/ocrService";
 import { Invoice } from "@/shared/types/invoice.types";
 
 export function SearchBar() {
@@ -16,29 +16,34 @@ export function SearchBar() {
         const newInvoices: Invoice[] = [];
 
         for (const file of acceptedFiles) {
-            const ocrData = await simulateOCR(file);
-            const invoice: Invoice = {
-                id: Math.random().toString(36).substring(7),
-                pdfFileName: file.name,
-                pdfUrl: URL.createObjectURL(file), // Real PDF preview would use this
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                status: ocrData.hasErrors ? 'pending' : 'pending',
-                supplierName: "",
-                supplierNIF: "",
-                receiverName: "Diputación de Sevilla",
-                receiverNIF: "P4100000I",
-                invoiceNumber: "",
-                invoiceDate: "",
-                description: "",
-                concept: "",
-                baseAmount: 0,
-                vatRate: 21,
-                vatAmount: 0,
-                totalAmount: 0,
-                ...ocrData,
-            };
-            newInvoices.push(invoice);
+            try {
+                const ocrData = await processFileWithOCR(file);
+                const invoice: Invoice = {
+                    id: Math.random().toString(36).substring(7),
+                    pdfFileName: file.name,
+                    pdfUrl: URL.createObjectURL(file), // Real PDF preview would use this
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    status: 'pending',
+                    supplierName: "",
+                    supplierNIF: "",
+                    receiverName: "Diputación de Sevilla",
+                    receiverNIF: "P4100000I",
+                    invoiceNumber: "",
+                    invoiceDate: "",
+                    description: "",
+                    concept: "",
+                    baseAmount: 0,
+                    vatRate: 21,
+                    vatAmount: 0,
+                    totalAmount: 0,
+                    ...ocrData,
+                };
+                newInvoices.push(invoice);
+            } catch (error) {
+                console.error("Error processing file:", error);
+                // Fallback or alert could be added here
+            }
         }
 
         addInvoices(newInvoices);
