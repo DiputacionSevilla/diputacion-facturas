@@ -16,34 +16,36 @@ export function SearchBar() {
         const newInvoices: Invoice[] = [];
 
         for (const file of acceptedFiles) {
+            let ocrData: Partial<Invoice> = {};
             try {
-                const ocrData = await processFileWithOCR(file);
-                const invoice: Invoice = {
-                    id: Math.random().toString(36).substring(7),
-                    pdfFileName: file.name,
-                    pdfUrl: URL.createObjectURL(file), // Real PDF preview would use this
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    status: 'pending',
-                    supplierName: "",
-                    supplierNIF: "",
-                    receiverName: "Diputación de Sevilla",
-                    receiverNIF: "P4100000I",
-                    invoiceNumber: "",
-                    invoiceDate: "",
-                    description: "",
-                    concept: "",
-                    baseAmount: 0,
-                    vatRate: 21,
-                    vatAmount: 0,
-                    totalAmount: 0,
-                    ...ocrData,
-                };
-                newInvoices.push(invoice);
+                ocrData = await processFileWithOCR(file);
             } catch (error) {
                 console.error("Error processing file:", error);
-                // Fallback or alert could be added here
+                ocrData = { hasErrors: true, description: "Error de procesamiento." };
             }
+
+            const invoice: Invoice = {
+                id: Math.random().toString(36).substring(7),
+                pdfFileName: file.name,
+                pdfUrl: URL.createObjectURL(file),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                status: 'pending',
+                supplierName: "",
+                supplierNIF: "",
+                receiverName: "Diputación de Sevilla",
+                receiverNIF: "P4100000I",
+                invoiceNumber: "",
+                invoiceDate: "",
+                description: "",
+                concept: "",
+                baseAmount: 0,
+                vatRate: 21,
+                vatAmount: 0,
+                totalAmount: 0,
+                ...ocrData,
+            };
+            newInvoices.push(invoice);
         }
 
         addInvoices(newInvoices);
@@ -52,7 +54,11 @@ export function SearchBar() {
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
-        accept: { 'application/pdf': ['.pdf'] }
+        accept: {
+            'application/pdf': ['.pdf'],
+            'image/jpeg': ['.jpg', '.jpeg'],
+            'image/png': ['.png']
+        }
     });
 
     return (

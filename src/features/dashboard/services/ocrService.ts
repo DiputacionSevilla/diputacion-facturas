@@ -2,17 +2,26 @@ import { createWorker } from 'tesseract.js';
 import { Invoice } from '@/shared/types/invoice.types';
 
 export async function processFileWithOCR(file: File): Promise<Partial<Invoice>> {
-    const worker = await createWorker('spa'); // Lenguaje español
+    try {
+        const worker = await createWorker('spa');
 
-    // Tesseract.js handles images well. For PDF, in a production app we would 
-    // convert PDF to image first using pdf.js. 
-    // For this prototype, if it's a PDF we'll try to process it (Tesseract.js 
-    // has some limited PDF support depending on the build).
+        // El motor Tesseract procesa mejor imágenes.
+        // Si el archivo es PDF, puede fallar si no es un PDF de texto simple.
+        const { data: { text } } = await worker.recognize(file);
+        await worker.terminate();
 
-    const { data: { text } } = await worker.recognize(file);
-    await worker.terminate();
+        if (!text || text.trim().length === 0) {
+            return { hasErrors: true, description: "OCR completado pero no se detectó texto legible." };
+        }
 
-    return parseInvoiceText(text);
+        return parseInvoiceText(text);
+    } catch (error) {
+        console.error("Error en OCR:", error);
+        return {
+            hasErrors: true,
+            description: "No se pudo procesar automáticamente. Por favor, revisa manualmente."
+        };
+    }
 }
 
 function parseInvoiceText(text: string): Partial<Invoice> {

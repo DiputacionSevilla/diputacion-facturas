@@ -25,55 +25,39 @@ export function PDFPreview() {
                     Miniatura: {selectedInvoice.pdfFileName || "Factura"}
                 </div>
                 <div className="flex items-center gap-3 text-slate-400">
-                    <Eye className="w-3.5 h-3.5 cursor-pointer hover:text-slate-600 transition-colors" />
-                    <Download className="w-3.5 h-3.5 cursor-pointer hover:text-slate-600 transition-colors" />
+                    <a
+                        href={selectedInvoice.pdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-slate-600 transition-colors"
+                        title="Ver en pantalla completa"
+                    >
+                        <Eye className="w-3.5 h-3.5 cursor-pointer" />
+                    </a>
+                    <a
+                        href={selectedInvoice.pdfUrl}
+                        download={selectedInvoice.pdfFileName || "factura.pdf"}
+                        className="hover:text-slate-600 transition-colors"
+                        title="Descargar PDF"
+                    >
+                        <Download className="w-3.5 h-3.5 cursor-pointer" />
+                    </a>
                 </div>
             </div>
 
-            <div className="flex-1 bg-slate-100 dark:bg-slate-950 p-4 flex flex-col items-center justify-center overflow-auto custom-scrollbar">
-                {/* Visual representation of a PDF document */}
-                <div className="w-full max-w-[180px] aspect-a4 bg-white dark:bg-slate-800 shadow-xl p-3 rounded-sm relative border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in duration-300">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="w-5 h-5 bg-green-50 dark:bg-green-900/30 rounded flex items-center justify-center">
-                            <span className="text-[10px] text-brand-green font-bold">D</span>
-                        </div>
-                        <div className="text-right">
-                            <div className="h-1 w-8 bg-slate-200 dark:bg-slate-700 rounded-full mb-1"></div>
-                            <div className="h-1 w-10 bg-brand-green/30 rounded-full"></div>
-                        </div>
+            <div className="flex-1 bg-slate-100 dark:bg-slate-950 flex flex-col items-center justify-center overflow-hidden">
+                {selectedInvoice.pdfUrl ? (
+                    <iframe
+                        src={`${selectedInvoice.pdfUrl}#toolbar=0&navpanes=0&view=FitH`}
+                        className="w-full h-full border-none"
+                        title="PDF Preview"
+                    />
+                ) : (
+                    <div className="flex flex-col items-center gap-4 text-slate-400">
+                        <FileText className="w-12 h-12 opacity-20" />
+                        <p className="text-[10px] uppercase font-bold tracking-widest">No hay archivo disponible</p>
                     </div>
-
-                    <div className="space-y-2">
-                        <div className="h-1 w-full bg-slate-100 dark:bg-slate-700 rounded-full"></div>
-                        <div className="h-1 w-2/3 bg-slate-100 dark:bg-slate-700 rounded-full"></div>
-
-                        <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-700 space-y-1">
-                            <div className="flex justify-between">
-                                <div className="h-1 w-8 bg-slate-50 dark:bg-slate-700/50 rounded-full"></div>
-                                <div className="h-1 w-6 bg-slate-50 dark:bg-slate-700/50 rounded-full"></div>
-                            </div>
-                            <div className="flex justify-between">
-                                <div className="h-1 w-8 bg-slate-50 dark:bg-slate-700/50 rounded-full"></div>
-                                <div className="h-1 w-6 bg-slate-50 dark:bg-slate-700/50 rounded-full"></div>
-                            </div>
-                            <div className="flex justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-700">
-                                <div className="h-1 w-10 bg-slate-200 dark:bg-slate-600 rounded-full"></div>
-                                <div className="h-1 w-8 bg-brand-green/40 rounded-full"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="absolute bottom-2 right-2 opacity-10">
-                        <Verified className="w-8 h-8" />
-                    </div>
-
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm cursor-pointer">
-                        <span className="text-[8px] font-bold text-primary uppercase">Ver Completo</span>
-                    </div>
-                </div>
-                <p className="mt-4 text-[9px] text-slate-400 font-medium uppercase tracking-widest">
-                    Previsualización IA
-                </p>
+                )}
             </div>
         </div>
     );
