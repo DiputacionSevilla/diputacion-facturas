@@ -21,33 +21,33 @@ interface InvoiceState {
     exportToCSV: () => void;
 }
 
-export const useInvoiceStore = create<InvoiceState>((set, get) => ({
+export const useInvoiceStore = create<InvoiceState>((set: any, get: any) => ({
     invoices: [],
     selectedInvoiceId: null,
     searchQuery: "",
     isProcessing: false,
 
-    setInvoices: (invoices) => set({ invoices }),
+    setInvoices: (invoices: Invoice[]) => set({ invoices }),
 
-    addInvoices: (newInvoices) => set((state) => ({
+    addInvoices: (newInvoices: Invoice[]) => set((state: InvoiceState) => ({
         invoices: [...state.invoices, ...newInvoices]
     })),
 
-    updateInvoice: (id, updates) => set((state) => ({
-        invoices: state.invoices.map((inv) =>
+    updateInvoice: (id: string, updates: Partial<Invoice>) => set((state: InvoiceState) => ({
+        invoices: state.invoices.map((inv: Invoice) =>
             inv.id === id ? { ...inv, ...updates, updatedAt: new Date().toISOString() } : inv
         )
     })),
 
-    setSelectedInvoiceId: (id) => set({ selectedInvoiceId: id }),
+    setSelectedInvoiceId: (id: string | null) => set({ selectedInvoiceId: id }),
 
-    setSearchQuery: (query) => set({ searchQuery: query }),
+    setSearchQuery: (query: string) => set({ searchQuery: query }),
 
-    setIsProcessing: (isProcessing) => set({ isProcessing }),
+    setIsProcessing: (isProcessing: boolean) => set({ isProcessing }),
 
     getSelectedInvoice: () => {
         const { invoices, selectedInvoiceId } = get();
-        return invoices.find((inv) => inv.id === selectedInvoiceId);
+        return invoices.find((inv: Invoice) => inv.id === selectedInvoiceId);
     },
 
     getFilteredInvoices: () => {
@@ -55,7 +55,7 @@ export const useInvoiceStore = create<InvoiceState>((set, get) => ({
         if (!searchQuery) return invoices;
 
         const lowerQuery = searchQuery.toLowerCase();
-        return invoices.filter((inv) =>
+        return invoices.filter((inv: Invoice) =>
             inv.supplierName.toLowerCase().includes(lowerQuery) ||
             inv.supplierNIF.toLowerCase().includes(lowerQuery) ||
             inv.invoiceNumber.toLowerCase().includes(lowerQuery)
@@ -67,7 +67,7 @@ export const useInvoiceStore = create<InvoiceState>((set, get) => ({
         if (invoices.length === 0) return;
 
         const headers = ["Nº Factura", "Fecha", "CIF/NIF Emisor", "Razón Social Emisor", "Importe Total", "Concepto"];
-        const rows = invoices.map(inv => [
+        const rows = invoices.map((inv: Invoice) => [
             inv.invoiceNumber,
             inv.invoiceDate,
             inv.supplierNIF,
@@ -78,7 +78,7 @@ export const useInvoiceStore = create<InvoiceState>((set, get) => ({
 
         const csvContent = [
             headers.join(","),
-            ...rows.map(row => row.join(","))
+            ...rows.map((row: any[]) => row.join(","))
         ].join("\n");
 
         const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
