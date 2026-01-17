@@ -41,4 +41,5 @@ export interface Invoice {
     // UI Helpers
     hasErrors?: boolean;
     errors?: Record<string, string>;
+    selected?: boolean;
 }

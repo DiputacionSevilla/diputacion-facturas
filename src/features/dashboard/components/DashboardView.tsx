@@ -8,7 +8,7 @@ import { PDFPreview } from "./PDFPreview";
 import { Save, CheckCircle, GripVertical } from "lucide-react";
 
 export function DashboardView() {
-    const { getFilteredInvoices } = useInvoiceStore();
+    const { getFilteredInvoices, toggleSelectAll } = useInvoiceStore();
     const filteredInvoices = getFilteredInvoices();
 
     // Estado para el montaje y el ancho del panel izquierdo
@@ -72,15 +72,14 @@ export function DashboardView() {
                     className="p-4 lg:p-6 space-y-4"
                 >
                     <div className="flex justify-between items-center px-1">
-                        <div className="flex gap-3 text-[10px] font-bold">
-                            <div className="flex items-center gap-1">
-                                <span className="w-3 h-3 bg-accent-green rounded-full"></span>
-                                <span className="text-slate-500 uppercase">Correcto</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <span className="w-3 h-3 bg-accent-red rounded-full"></span>
-                                <span className="text-slate-500 uppercase">Revisión Requerida</span>
-                            </div>
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                className="w-3.5 h-3.5 rounded border-slate-300 text-brand-green focus:ring-brand-green cursor-pointer"
+                                checked={filteredInvoices.length > 0 && filteredInvoices.every((i: any) => i.selected)}
+                                onChange={(e) => toggleSelectAll(e.target.checked)}
+                            />
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Marcar todo como validado</span>
                         </div>
                         <div className="text-[10px] text-slate-400 italic">
                             {filteredInvoices.length} factura(s) encontradas
