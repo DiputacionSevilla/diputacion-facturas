@@ -4,7 +4,7 @@ import { Invoice } from "@/shared/types/invoice.types";
 import { cn } from "@/shared/lib/utils";
 import { useInvoiceStore } from "../store/useInvoiceStore";
 import { Trash2, AlertTriangle } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Modal } from "@/shared/components/ui/Modal";
 import { Calendar } from "lucide-react";
 
@@ -31,6 +31,7 @@ export function InvoiceCard({ invoice }: Props) {
     const { updateInvoice, selectedInvoiceId, setSelectedInvoiceId, toggleSelectInvoice, deleteInvoice, areas } = useInvoiceStore();
     const isSelected = selectedInvoiceId === invoice.id;
     const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+    const dateInputRef = useRef<HTMLInputElement>(null);
 
     const handleChange = (field: keyof Invoice, value: any) => {
         updateInvoice(invoice.id, { [field]: value });
@@ -108,11 +109,23 @@ export function InvoiceCard({ invoice }: Props) {
                                     value={invoice.invoiceDate}
                                     onChange={(e) => handleChange("invoiceDate", e.target.value)}
                                 />
-                                <div className="absolute right-2 top-1.5 cursor-pointer text-slate-400 group-hover/date:text-brand-green transition-colors">
+                                <div
+                                    onClick={() => {
+                                        try {
+                                            // @ts-ignore - showPicker is modern but not in all types
+                                            dateInputRef.current?.showPicker();
+                                        } catch (e) {
+                                            // Fallback for browsers without showPicker
+                                            dateInputRef.current?.click();
+                                        }
+                                    }}
+                                    className="absolute right-2 top-1.5 cursor-pointer text-slate-400 group-hover/date:text-brand-green transition-colors z-10"
+                                >
                                     <Calendar className="w-3 h-3" />
                                     <input
+                                        ref={dateInputRef}
                                         type="date"
-                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                                         value={toInputDate(invoice.invoiceDate)}
                                         onChange={(e) => handleChange("invoiceDate", fromInputDate(e.target.value))}
                                     />
@@ -204,13 +217,13 @@ export function InvoiceCard({ invoice }: Props) {
                                 onChange={(e) => handleChange("description", e.target.value)}
                             >
                                 <option value="">Seleccionar área...</option>
-                                {areas.map(area => (
+                                {areas.map((area: any) => (
                                     <option key={area.code} value={area.description}>
                                         {area.description}
                                     </option>
                                 ))}
                                 {/* Opción por si el OCR trajo algo que no está en la lista */}
-                                {invoice.description && !areas.some(a => a.description === invoice.description) && (
+                                {invoice.description && !areas.some((a: any) => a.description === invoice.description) && (
                                     <option value={invoice.description}>{invoice.description} (Extraído)</option>
                                 )}
                             </select>
