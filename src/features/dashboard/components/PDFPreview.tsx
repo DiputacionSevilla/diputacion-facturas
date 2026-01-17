@@ -3,10 +3,13 @@
 import { useInvoiceStore } from "../store/useInvoiceStore";
 import { FileText, Download, Eye, Verified } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { useState } from "react";
+import { OCRDebugModal } from "./OCRDebugModal";
 
 export function PDFPreview() {
     const { getSelectedInvoice } = useInvoiceStore();
     const selectedInvoice = getSelectedInvoice();
+    const [isDebugOpen, setIsDebugOpen] = useState(false);
 
     if (!selectedInvoice) {
         return (
@@ -26,13 +29,21 @@ export function PDFPreview() {
                 </div>
                 <div className="flex items-center gap-3 text-slate-400">
                     {selectedInvoice.ocrText && (
-                        <button
-                            onClick={() => alert(`TEXTO EXTRAÍDO (OCR):\n\n${selectedInvoice.ocrText}`)}
-                            className="flex items-center gap-1 px-2 py-1 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-[9px] font-bold rounded text-slate-700 dark:text-slate-200 transition-all uppercase"
-                        >
-                            <Eye className="w-3 h-3" />
-                            Debug OCR
-                        </button>
+                        <>
+                            <button
+                                onClick={() => setIsDebugOpen(true)}
+                                className="flex items-center gap-1 px-2 py-1 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-[9px] font-bold rounded text-slate-700 dark:text-slate-200 transition-all uppercase"
+                            >
+                                <Eye className="w-3 h-3" />
+                                Debug OCR
+                            </button>
+                            <OCRDebugModal
+                                isOpen={isDebugOpen}
+                                onClose={() => setIsDebugOpen(false)}
+                                text={selectedInvoice.ocrText}
+                                fileName={selectedInvoice.pdfFileName}
+                            />
+                        </>
                     )}
                     <a
                         href={selectedInvoice.pdfUrl}

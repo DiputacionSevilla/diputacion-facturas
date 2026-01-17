@@ -1,20 +1,14 @@
 "use client";
 
 import { Search, Upload, Loader2 } from "lucide-react";
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { useInvoiceStore } from "../store/useInvoiceStore";
 import { processFileWithOCR } from "../services/ocrService";
 import { Invoice } from "@/shared/types/invoice.types";
-import { OCRDebugModal } from "./OCRDebugModal";
 
 export function SearchBar() {
     const { searchQuery, setSearchQuery, addInvoices, isProcessing, setIsProcessing } = useInvoiceStore();
-    const [debugInfo, setDebugInfo] = useState<{ isOpen: boolean; text: string; fileName: string }>({
-        isOpen: false,
-        text: "",
-        fileName: ""
-    });
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         setIsProcessing(true);
@@ -57,16 +51,6 @@ export function SearchBar() {
 
         addInvoices(newInvoices);
         setIsProcessing(false);
-
-        if (newInvoices.length > 0) {
-            const firstInvoice = newInvoices[newInvoices.length - 1]; // Mostrar la última subida
-            console.log("Triggering debug modal with text length:", firstInvoice.ocrText?.length);
-            setDebugInfo({
-                isOpen: true,
-                text: firstInvoice.ocrText || "",
-                fileName: firstInvoice.pdfFileName
-            });
-        }
     }, [addInvoices, setIsProcessing]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -103,13 +87,6 @@ export function SearchBar() {
                     </button>
                 </div>
             </div>
-
-            <OCRDebugModal
-                isOpen={debugInfo.isOpen}
-                onClose={() => setDebugInfo({ ...debugInfo, isOpen: false })}
-                text={debugInfo.text}
-                fileName={debugInfo.fileName}
-            />
         </div>
     );
 }
