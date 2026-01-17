@@ -18,8 +18,8 @@ export function Header() {
     };
 
     return (
-        <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 sticky top-0 z-50">
-            <div className="max-w-7xl mx-auto flex justify-between items-center gap-2">
+        <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 lg:px-6 py-4 sticky top-0 z-50">
+            <div className="w-full flex justify-between items-center gap-2">
                 <div className="flex flex-col">
                     <h1 className="text-xl font-bold text-brand-green flex flex-wrap items-center">
                         PaperToSic@l{" "}
