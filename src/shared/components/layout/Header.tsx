@@ -28,7 +28,7 @@ export function Header() {
                         </span>
                     </h1>
                     <span className="text-[9px] text-slate-500 font-bold uppercase truncate">
-                        Diputación Provincial
+                        Diputación Provincial de Sevilla
                     </span>
                 </div>
                 <div className="flex items-center gap-2">
