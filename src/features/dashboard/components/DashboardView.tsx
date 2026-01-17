@@ -6,9 +6,10 @@ import { SearchBar } from "./SearchBar";
 import { InvoiceCard } from "./InvoiceCard";
 import { PDFPreview } from "./PDFPreview";
 import { Save, CheckCircle, GripVertical } from "lucide-react";
+import { getAreas } from "../services/areaService";
 
 export function DashboardView() {
-    const { getFilteredInvoices, toggleSelectAll } = useInvoiceStore();
+    const { getFilteredInvoices, toggleSelectAll, setAreas } = useInvoiceStore();
     const filteredInvoices = getFilteredInvoices();
 
     // Estado para el montaje y el ancho del panel izquierdo
@@ -18,7 +19,9 @@ export function DashboardView() {
 
     useEffect(() => {
         setMounted(true);
-    }, []);
+        // Cargar áreas desde el CSV via Server Action
+        getAreas().then(setAreas);
+    }, [setAreas]);
 
     const handleSaveToSical = () => {
         alert("Simulando exportación a SICAL...\nLos datos y los PDFs serían enviados al servicio web externo.");

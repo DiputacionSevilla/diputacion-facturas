@@ -1,12 +1,14 @@
 import { create } from "zustand";
 import { Invoice } from "@/shared/types/invoice.types";
 import { InvoiceSchema } from "@/shared/types/invoice.schema";
+import { Area } from "../services/areaService";
 
 interface InvoiceState {
     invoices: Invoice[];
     selectedInvoiceId: string | null;
     searchQuery: string;
     isProcessing: boolean;
+    areas: Area[];
 
     // Actions
     setInvoices: (invoices: Invoice[]) => void;
@@ -18,6 +20,7 @@ interface InvoiceState {
     toggleSelectInvoice: (id: string) => void;
     toggleSelectAll: (selected: boolean) => void;
     deleteInvoice: (id: string) => void;
+    setAreas: (areas: Area[]) => void;
 
     // Selectors
     getSelectedInvoice: () => Invoice | undefined;
@@ -30,6 +33,7 @@ export const useInvoiceStore = create<InvoiceState>((set: any, get: any) => ({
     selectedInvoiceId: null,
     searchQuery: "",
     isProcessing: false,
+    areas: [],
 
     setInvoices: (invoices: Invoice[]) => set({ invoices }),
 
@@ -76,6 +80,8 @@ export const useInvoiceStore = create<InvoiceState>((set: any, get: any) => ({
         invoices: state.invoices.filter((inv: Invoice) => inv.id !== id),
         selectedInvoiceId: state.selectedInvoiceId === id ? null : state.selectedInvoiceId
     })),
+
+    setAreas: (areas: Area[]) => set({ areas }),
 
     getSelectedInvoice: () => {
         const { invoices, selectedInvoiceId } = get();

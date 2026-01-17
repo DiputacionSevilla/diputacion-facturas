@@ -6,13 +6,29 @@ import { useInvoiceStore } from "../store/useInvoiceStore";
 import { Trash2, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { Modal } from "@/shared/components/ui/Modal";
+import { Calendar } from "lucide-react";
 
 interface Props {
     invoice: Invoice;
 }
 
+// Helpers para conversión de fechas
+const toInputDate = (str: string) => {
+    if (!str) return "";
+    const parts = str.split("/");
+    if (parts.length === 3) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+    return str;
+};
+
+const fromInputDate = (str: string) => {
+    if (!str) return "";
+    const parts = str.split("-");
+    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    return str;
+};
+
 export function InvoiceCard({ invoice }: Props) {
-    const { updateInvoice, selectedInvoiceId, setSelectedInvoiceId, toggleSelectInvoice, deleteInvoice } = useInvoiceStore();
+    const { updateInvoice, selectedInvoiceId, setSelectedInvoiceId, toggleSelectInvoice, deleteInvoice, areas } = useInvoiceStore();
     const isSelected = selectedInvoiceId === invoice.id;
     const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
@@ -81,15 +97,27 @@ export function InvoiceCard({ invoice }: Props) {
                         </div>
                         <div className="col-span-1">
                             <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Fecha</label>
-                            <input
-                                className={cn(
-                                    "editable-input",
-                                    invoice.errors?.invoiceDate && "border-accent-red dark:border-red-900 focus:ring-accent-red"
-                                )}
-                                type="text"
-                                value={invoice.invoiceDate}
-                                onChange={(e) => handleChange("invoiceDate", e.target.value)}
-                            />
+                            <div className="relative group/date">
+                                <input
+                                    className={cn(
+                                        "editable-input pr-7",
+                                        invoice.errors?.invoiceDate && "border-accent-red dark:border-red-900 focus:ring-accent-red"
+                                    )}
+                                    type="text"
+                                    placeholder="DD/MM/YYYY"
+                                    value={invoice.invoiceDate}
+                                    onChange={(e) => handleChange("invoiceDate", e.target.value)}
+                                />
+                                <div className="absolute right-2 top-1.5 cursor-pointer text-slate-400 group-hover/date:text-brand-green transition-colors">
+                                    <Calendar className="w-3 h-3" />
+                                    <input
+                                        type="date"
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                        value={toInputDate(invoice.invoiceDate)}
+                                        onChange={(e) => handleChange("invoiceDate", fromInputDate(e.target.value))}
+                                    />
+                                </div>
+                            </div>
                             {invoice.errors?.invoiceDate && (
                                 <span className="text-[7px] text-accent-red font-bold mt-0.5 block">{invoice.errors.invoiceDate}</span>
                             )}
@@ -169,12 +197,23 @@ export function InvoiceCard({ invoice }: Props) {
                         </div>
                         <div className="col-span-2 md:col-span-1">
                             <label className="block text-[8px] font-bold text-slate-400 uppercase mb-0.5">Área Destino</label>
-                            <input
-                                className="editable-input"
-                                type="text"
+                            <select
+                                className="editable-input appearance-none bg-no-repeat bg-right"
+                                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundSize: '12px', backgroundPosition: 'calc(100% - 8px) center' }}
                                 value={invoice.description}
                                 onChange={(e) => handleChange("description", e.target.value)}
-                            />
+                            >
+                                <option value="">Seleccionar área...</option>
+                                {areas.map(area => (
+                                    <option key={area.code} value={area.description}>
+                                        {area.description}
+                                    </option>
+                                ))}
+                                {/* Opción por si el OCR trajo algo que no está en la lista */}
+                                {invoice.description && !areas.some(a => a.description === invoice.description) && (
+                                    <option value={invoice.description}>{invoice.description} (Extraído)</option>
+                                )}
+                            </select>
                         </div>
                     </div>
                 </div>
