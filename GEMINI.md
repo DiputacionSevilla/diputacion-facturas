@@ -249,6 +249,10 @@ npm run commit       # Conventional Commits
 ---
 
 ## 🧪 Testing (Patrón AAA)
+### 2026-01-20: Build de Vercel bloqueado por mcpServer experimental
+- **Error**: El build en Vercel se queda congelado tras "Compiled successfully" en la fase de Static Generation.
+- **Fix**: Desactivar `experimental.mcpServer` en `next.config.ts`.
+- **Aplicar en**: Todos los proyectos con Next.js 16 que desplieguen en Vercel.
 
 ```typescript
 test('should calculate total with tax', () => {
