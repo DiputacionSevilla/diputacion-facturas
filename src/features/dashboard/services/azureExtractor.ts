@@ -18,6 +18,16 @@ const AZURE_ENDPOINT = process.env.AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT || "";
 const AZURE_KEY = process.env.AZURE_DOCUMENT_INTELLIGENCE_KEY || "";
 const MODEL_ID = "prebuilt-invoice";
 
+function validateConfig() {
+    if (!AZURE_ENDPOINT) {
+        throw new Error("AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT no está configurada en las variables de entorno.");
+    }
+    if (!AZURE_KEY) {
+        throw new Error("AZURE_DOCUMENT_INTELLIGENCE_KEY no está configurada en las variables de entorno.");
+    }
+}
+
+
 export async function extractWithAzure(formData: FormData): Promise<AzureExtractorResponse> {
     const file = formData.get("file") as File;
     if (!file) throw new Error("No se ha proporcionado ningún archivo.");
@@ -25,8 +35,14 @@ export async function extractWithAzure(formData: FormData): Promise<AzureExtract
     console.log(`[Azure AI] Procesando factura: ${file.name} (${file.size} bytes)`);
 
     try {
+        validateConfig();
+        
         // 1. Enviar el documento para análisis
-        const analyzeUrl = `${AZURE_ENDPOINT}formrecognizer/documentModels/${MODEL_ID}:analyze?api-version=2023-07-31`;
+        // Limpiar el endpoint para asegurar que no termina en / y que tiene el formato correcto
+        const baseUrl = AZURE_ENDPOINT.endsWith('/') ? AZURE_ENDPOINT.slice(0, -1) : AZURE_ENDPOINT;
+        const analyzeUrl = `${baseUrl}/formrecognizer/documentModels/${MODEL_ID}:analyze?api-version=2023-07-31`;
+
+        console.log(`[Azure AI] Usando endpoint: ${baseUrl}`);
 
         const fileContent = await file.arrayBuffer();
 
@@ -40,9 +56,16 @@ export async function extractWithAzure(formData: FormData): Promise<AzureExtract
         });
 
         if (!response.ok) {
-            const error = await response.text();
-            console.error("[Azure AI] Error en el envío:", error);
-            throw new Error(`Error de comunicación con Azure: ${response.statusText}`);
+            const errorText = await response.text();
+            let errorMessage = `Error de Azure (${response.status} ${response.statusText})`;
+            try {
+                const errorJson = JSON.parse(errorText);
+                errorMessage += `: ${errorJson.error?.message || errorText}`;
+            } catch {
+                errorMessage += `: ${errorText}`;
+            }
+            console.error("[Azure AI] Error en el envío:", errorText);
+            throw new Error(errorMessage);
         }
 
         const operationLocation = response.headers.get("operation-location");
