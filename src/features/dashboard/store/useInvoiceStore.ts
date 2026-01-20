@@ -39,15 +39,15 @@ interface InvoiceState {
 export const useInvoiceStore = create<InvoiceState>()(
     persist(
         (set: any, get: any) => ({
-            invoices: [],
-            selectedInvoiceId: null,
+            invoices: [] as Invoice[],
+            selectedInvoiceId: null as string | null,
             searchQuery: "",
-            isProcessing: false,
-            areas: [],
-            selectedEntityCode: null,
-            selectedEntityName: null,
-            userName: null,
-            extractionSource: 'tesseract',
+            isProcessing: false as boolean,
+            areas: [] as Area[],
+            selectedEntityCode: null as string | null,
+            selectedEntityName: null as string | null,
+            userName: null as string | null,
+            extractionSource: 'tesseract' as 'tesseract' | 'azure',
 
             setInvoices: (invoices: Invoice[]) => set({ invoices }),
 
