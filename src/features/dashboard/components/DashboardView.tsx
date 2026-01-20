@@ -5,26 +5,32 @@ import { useInvoiceStore } from "../store/useInvoiceStore";
 import { SearchBar } from "./SearchBar";
 import { InvoiceCard } from "./InvoiceCard";
 import { PDFPreview } from "./PDFPreview";
-import { Save, CheckCircle, GripVertical } from "lucide-react";
+import { SideralModal } from "./SideralModal";
+import { Save, CheckCircle, GripVertical, Cloud } from "lucide-react";
 import { getAreas } from "../services/areaService";
 
 export function DashboardView() {
-    const { getFilteredInvoices, toggleSelectAll, setAreas } = useInvoiceStore();
+    const { getFilteredInvoices, toggleSelectAll, setAreas, selectedEntityCode } = useInvoiceStore();
     const filteredInvoices = getFilteredInvoices();
 
     // Estado para el montaje y el ancho del panel izquierdo
     const [mounted, setMounted] = useState(false);
     const [leftWidth, setLeftWidth] = useState(60);
+    const [isSideralOpen, setIsSideralOpen] = useState(false);
     const isResizing = useRef(false);
 
     useEffect(() => {
         setMounted(true);
-        // Cargar áreas desde el CSV via Server Action
-        getAreas().then(setAreas);
-    }, [setAreas]);
+        // Cargar áreas filtradas por la entidad seleccionada
+        getAreas(selectedEntityCode || undefined).then(setAreas);
+    }, [setAreas, selectedEntityCode]);
 
     const handleSaveToSical = () => {
-        alert("Simulando exportación a SICAL...\nLos datos y los PDFs serían enviados al servicio web externo.");
+        alert("Simulando exportación a SICAL...\nContabilizando facturas validadas en el sistema económico.");
+    };
+
+    const handleSideralConfirm = (data: { office: string; area: string }) => {
+        alert(`Simulando exportación a SIDERAL...\nOficina: ${data.office}\nÁrea: ${data.area}\nContabilizando y registrando automáticamente.`);
     };
 
     const startResizing = useCallback(() => {
@@ -41,11 +47,7 @@ export function DashboardView() {
 
     const onResize = useCallback((e: MouseEvent) => {
         if (!isResizing.current) return;
-
-        // Calcular nuevo porcentaje basado en el ancho de la ventana
         const newWidth = (e.clientX / window.innerWidth) * 100;
-
-        // Límites de seguridad (25% - 75%)
         if (newWidth > 20 && newWidth < 80) {
             setLeftWidth(newWidth);
         }
@@ -60,7 +62,6 @@ export function DashboardView() {
         };
     }, [onResize, stopResizing]);
 
-    // Calcular anchos solo tras el montaje
     const calculatedLeftWidth = mounted ? `${leftWidth}%` : '60%';
     const calculatedRightWidth = mounted ? `${100 - leftWidth}%` : '40%';
 
@@ -102,21 +103,42 @@ export function DashboardView() {
                         )}
                     </div>
 
-                    <button
-                        onClick={handleSaveToSical}
-                        disabled={filteredInvoices.length === 0}
-                        className="bg-primary text-white p-4 rounded-sm shadow-lg flex items-center gap-4 hover:brightness-110 transition group w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <div className="border-2 border-white/30 rounded p-1 group-hover:border-white/60 transition">
-                            <Save className="w-5 h-5 font-bold" />
-                        </div>
-                        <div className="text-left">
-                            <div className="font-bold text-sm leading-tight uppercase">GRABAR EN SICAL</div>
-                            <div className="text-[9px] opacity-80 uppercase tracking-tighter">
-                                CONTABILIZAR FACTURAS VALIDADAS
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                        <button
+                            onClick={handleSaveToSical}
+                            disabled={filteredInvoices.length === 0}
+                            className="bg-primary text-white p-4 rounded-sm shadow-lg flex items-center gap-4 hover:brightness-110 transition group justify-center disabled:opacity-50 disabled:cursor-not-allowed border border-white/10"
+                            title="Contabilizar facturas validadas"
+                        >
+                            <div className="border border-white/30 rounded p-1.5 group-hover:border-white/60 transition">
+                                <Save className="w-5 h-5" />
                             </div>
-                        </div>
-                    </button>
+                            <div className="text-left">
+                                <div className="font-bold text-sm leading-tight uppercase">GRABAR EN SICAL</div>
+                                <div className="text-[8px] opacity-70 uppercase tracking-tighter">
+                                    Contabilizar facturas validadas
+                                </div>
+                            </div>
+                        </button>
+
+                        <button
+                            onClick={() => setIsSideralOpen(true)}
+                            disabled={filteredInvoices.length === 0}
+                            className="bg-brand-green text-white p-4 rounded-sm shadow-lg flex items-center gap-4 hover:brightness-110 transition group justify-center disabled:opacity-50 disabled:cursor-not-allowed border border-black/10"
+                            title="Contabilizar facturas validadas y registro automático en Sideral"
+                        >
+                            <div className="border border-white/30 rounded p-1.5 group-hover:border-white/60 transition">
+                                <Cloud className="w-5 h-5" />
+                            </div>
+                            <div className="text-left">
+                                <div className="font-bold text-sm leading-tight uppercase">GRABAR EN SIDERAL</div>
+                                <div className="text-[8px] opacity-70 uppercase tracking-tighter">
+                                    Registro automático y contabilidad
+                                </div>
+                            </div>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Divisor / Resizer */}
@@ -137,6 +159,12 @@ export function DashboardView() {
                     </div>
                 </div>
             </div>
+
+            <SideralModal
+                isOpen={isSideralOpen}
+                onClose={() => setIsSideralOpen(false)}
+                onConfirm={handleSideralConfirm}
+            />
         </div>
     );
 }

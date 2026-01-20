@@ -8,7 +8,7 @@ import { processFileWithOCR } from "../services/ocrService";
 import { Invoice } from "@/shared/types/invoice.types";
 
 export function SearchBar() {
-    const { searchQuery, setSearchQuery, addInvoices, isProcessing, setIsProcessing } = useInvoiceStore();
+    const { searchQuery, setSearchQuery, addInvoices, isProcessing, setIsProcessing, extractionSource } = useInvoiceStore();
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         setIsProcessing(true);
@@ -18,10 +18,10 @@ export function SearchBar() {
         for (const file of acceptedFiles) {
             let ocrData: Partial<Invoice> = {};
             try {
-                ocrData = await processFileWithOCR(file);
+                ocrData = await processFileWithOCR(file, extractionSource);
             } catch (error) {
                 console.error("Error processing file:", error);
-                ocrData = { hasErrors: true, description: "Error de procesamiento." };
+                ocrData = { hasErrors: true, concept: "Error de procesamiento." };
             }
 
             const invoice: Invoice = {
@@ -31,27 +31,31 @@ export function SearchBar() {
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 status: 'pending',
-                supplierName: "",
-                supplierNIF: "",
-                receiverName: "Diputación de Sevilla",
-                receiverNIF: "P4100000I",
-                invoiceNumber: "",
+
+                // 14 Fields Initialization
+                registrationDate: new Date().toLocaleDateString('es-ES'),
+                registrationNumber: "",
                 invoiceDate: "",
-                description: "",
+                invoiceNumber: "",
+                supplierNIF: "",
+                supplierName: "",
                 concept: "",
+                sicalOffice: "",
+                sicalArea: "",
                 baseAmount: 0,
-                vatRate: 21,
-                vatAmount: 0,
+                taxPercent: 21,
+                taxAmount: 0,
+                discountAmount: 0,
                 totalAmount: 0,
+
                 ...ocrData,
             };
-            console.log("Invoice created with ocrText length:", invoice.ocrText?.length || 0);
             newInvoices.push(invoice);
         }
 
         addInvoices(newInvoices);
         setIsProcessing(false);
-    }, [addInvoices, setIsProcessing]);
+    }, [addInvoices, setIsProcessing, extractionSource]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,

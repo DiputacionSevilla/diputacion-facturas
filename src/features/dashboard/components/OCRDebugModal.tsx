@@ -38,7 +38,7 @@ export function OCRDebugModal({ isOpen, onClose, text, fileName }: Props) {
                 </div>
 
                 <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 text-blue-700 dark:text-blue-300 text-[10px] leading-relaxed">
-                    <strong>Nota:</strong> Este es el texto bruto extraído por Tesseract.js. Si ves el contenido de la factura aquí pero los campos de la tabla están vacíos, es necesario ajustar las reglas de extracción (RegEx).
+                    <strong>Nota:</strong> Este es el texto bruto extraído por {text.includes("Azure") ? "Azure Document Intelligence" : "Tesseract.js"}. Si ves el contenido de la factura aquí pero los campos de la tabla están vacíos, es necesario ajustar las reglas de extracción.
                 </div>
             </div>
         </Modal>

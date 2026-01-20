@@ -1,12 +1,13 @@
+import { Shell } from "@/shared/components/layout/Shell";
+
 export default function MainLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen">
-      {/* Nav, Sidebar, etc. */}
-      <main>{children}</main>
-    </div>
+    <Shell>
+      {children}
+    </Shell>
   )
 }

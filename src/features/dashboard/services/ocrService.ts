@@ -1,86 +1,90 @@
 import { createWorker } from 'tesseract.js';
 import { Invoice } from '@/shared/types/invoice.types';
+import { extractWithAzure } from './azureExtractor';
 
-export async function processFileWithOCR(file: File): Promise<Partial<Invoice>> {
+export async function processFileWithOCR(file: File, source: 'tesseract' | 'azure'): Promise<Partial<Invoice>> {
     try {
         if (typeof window === 'undefined') return {};
 
-        // Importación dinámica para evitar errores de DOMMatrix en SSR
-        const pdfjsLib = await import('pdfjs-dist');
+        if (source === 'azure') {
+            const formData = new FormData();
+            formData.append("file", file);
+            const azureData = await extractWithAzure(formData);
+            return {
+                ...azureData,
+                status: 'pending',
+                hasErrors: false,
+                ocrText: "Extraído mediante Azure Document Intelligence"
+            };
+        }
 
-        // Usar el worker local para evitar fallos de fetch en el CDN
+        // --- Tesseract Logic ---
+        const pdfjsLib = await import('pdfjs-dist');
         pdfjsLib.GlobalWorkerOptions.workerSrc = '/workers/pdf.worker.min.mjs';
 
         let imageData: string | Uint8Array | File = file;
 
-        // Si es un PDF, convertir la primera página a imagen usando PDF.js
         if (file.type === 'application/pdf') {
             const arrayBuffer = await file.arrayBuffer();
             const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
             const page = await pdf.getPage(1);
-
-            const viewport = page.getViewport({ scale: 2.0 }); // Escala 2.0 para mejor resolución OCR
+            const viewport = page.getViewport({ scale: 2.0 });
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
 
             if (context) {
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
-
                 await page.render({
                     canvasContext: context,
                     viewport: viewport,
                     canvas: canvas
                 }).promise;
-
-                // Convertir canvas a Blob para Tesseract
                 imageData = canvas.toDataURL('image/png');
             }
         } else {
-            // Para imágenes, usar Uint8Array para evitar errores de lectura de Tesseract
             imageData = new Uint8Array(await file.arrayBuffer());
         }
 
         const worker = await createWorker('spa');
-        // Usamos doble cast (unknown -> any) para evitar el error de tipos en el build de Vercel 
-        // sin romper la funcionalidad en el cliente donde imageData es un formato válido.
         const { data: { text } } = await worker.recognize(imageData as unknown as any);
         await worker.terminate();
 
         if (!text || text.trim().length === 0) {
-            console.log("OCR: No se detectó texto.");
-            return { hasErrors: true, description: "OCR finalizado pero no se detectó texto legible.", ocrText: "--- Sin texto legible ---" };
+            return { hasErrors: true, concept: "OCR: No se detectó texto legible." };
         }
 
         const parsedData = parseInvoiceText(text);
-        console.log("OCR: Datos parseados correctamente. Enviando ocrText...");
         return { ...parsedData, ocrText: text };
+
     } catch (error) {
-        console.error("Error en OCR:", error);
+        console.error("Error en extracción:", error);
         return {
             hasErrors: true,
-            description: "Error al procesar el archivo. Asegúrate de que sea una imagen o PDF legible.",
-            ocrText: `Error: ${String(error)}`
+            concept: `Error: ${String(error)}`
         };
     }
 }
 
 function parseInvoiceText(text: string): Partial<Invoice> {
     const data: Partial<Invoice> = {
-        description: "Extraído mediante OCR",
         concept: "Factura procesada automáticamente",
+        registrationDate: new Date().toLocaleDateString('es-ES'),
+        registrationNumber: "",
+        sicalOffice: "",
+        sicalArea: "",
+        discountAmount: 0,
+        taxPercent: 21
     };
 
-    // 1. Extraer NIF/CIF (B12345678, A12345678, 12345678A)
+    // 1. Extraer NIF/CIF
     const nifRegex = /([ABCDEFGHJKLMNPQRSUVW][0-9]{8}|[0-9]{8}[A-Z])/gi;
     const nifs = text.match(nifRegex);
     if (nifs && nifs.length > 0) {
-        // El primero suele ser el emisor, el segundo el receptor (Diputación suele estar fija)
-        data.supplierNIF = nifs[0].toUpperCase();
+        data.supplierNIF = nifs[0].toUpperCase().replace(/[^a-zA-Z0-9]/g, '');
     }
 
-    // 2. Extraer Importe Total (Busca números con coma/punto cerca de palabras clave)
-    // Ejemplo: Total Factura 1.250,45
+    // 2. Extraer Importe Total
     const totalRegex = /(?:total|importe|total\s+factura|a\s+pagar)[\s:]*([0-9]{1,3}(?:\.[0-9]{3})*(?:,[0-9]{2}))/gi;
     const totals = text.matchAll(totalRegex);
     let maxTotal = 0;
@@ -88,18 +92,24 @@ function parseInvoiceText(text: string): Partial<Invoice> {
         const value = parseFloat(match[1].replace('.', '').replace(',', '.'));
         if (value > maxTotal) maxTotal = value;
     }
+
     if (maxTotal > 0) {
         data.totalAmount = maxTotal;
         data.baseAmount = +(maxTotal / 1.21).toFixed(2);
-        data.vatAmount = +(maxTotal - data.baseAmount).toFixed(2);
-        data.vatRate = 21;
+        data.taxAmount = +(maxTotal - data.baseAmount).toFixed(2);
+    } else {
+        data.totalAmount = 0;
+        data.baseAmount = 0;
+        data.taxAmount = 0;
     }
 
-    // 3. Extraer Fecha (DD/MM/YYYY)
+    // 3. Extraer Fecha
     const dateRegex = /(\d{2})[\/\- ](\d{2})[\/\- ](\d{4})/g;
     const dates = text.match(dateRegex);
     if (dates && dates.length > 0) {
         data.invoiceDate = dates[0];
+    } else {
+        data.invoiceDate = "";
     }
 
     // 4. Extraer Número de Factura
@@ -111,13 +121,11 @@ function parseInvoiceText(text: string): Partial<Invoice> {
             break;
         }
     }
+    if (!data.invoiceNumber) data.invoiceNumber = "PTE";
 
-    // Intentar sacar el nombre del proveedor (Suele estar al principio)
+    // Razon Social (primera línea con contenido)
     const lines = text.split('\n').filter(l => l.trim().length > 5);
-    if (lines.length > 0) {
-        // Normalmente las primeras líneas contienen el nombre de la empresa
-        data.supplierName = lines[0].trim();
-    }
+    data.supplierName = lines.length > 0 ? lines[0].trim() : "Desconocido";
 
     return data;
 }

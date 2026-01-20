@@ -6,20 +6,33 @@ import path from "path";
 export interface Area {
     code: string;
     description: string;
+    entityCode: string;
+    entityName: string;
 }
 
-export async function getAreas(): Promise<Area[]> {
+export async function getAreas(entityCode?: string): Promise<Area[]> {
     try {
         const filePath = path.join(process.cwd(), "src", "areas.csv");
         const fileContent = fs.readFileSync(filePath, "utf-8");
 
-        return fileContent
+        const allAreas = fileContent
             .split("\n")
             .filter(line => line.trim() !== "")
             .map(line => {
-                const [code, description] = line.split(";");
-                return { code: code.trim(), description: description.trim() };
+                const [entCode, entName, areaCode, areaDescription] = line.split(";");
+                return {
+                    code: areaCode?.trim() || "",
+                    description: areaDescription?.trim() || "",
+                    entityCode: entCode?.trim() || "",
+                    entityName: entName?.trim() || ""
+                };
             });
+
+        if (entityCode) {
+            return allAreas.filter(a => a.entityCode === entityCode);
+        }
+
+        return allAreas;
     } catch (error) {
         console.error("Error reading areas.csv:", error);
         return [];

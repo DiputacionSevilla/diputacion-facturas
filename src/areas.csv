@@ -1,5 +1,8 @@
-01;Presidencia
-02;Cultura y Ciudadania
-03;Regimen Interior
-04;Empleado Publico
-05;Servicios Supramunicipales
+01;Diputacion de Sevilla;01;Presidencia
+01;Diputacion de Sevilla;02;Cultura y Ciudadania
+01;Diputacion de Sevilla;03;Regimen Interior
+01;Diputacion de Sevilla;04;Empleado Publico
+01;Diputacion de Sevilla;05;Servicios Supramunicipales
+02;OPAEF;01;Servicios Generales
+03;Consorcio de Extincion de Incendios;01;Servicios Generales
+04;Casa de la Provincia;01;Servicios Generales
