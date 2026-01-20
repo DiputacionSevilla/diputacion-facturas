@@ -1,4 +1,5 @@
 import { Shell } from "@/shared/components/layout/Shell";
+import { AuthGuard } from "@/shared/components/layout/AuthGuard";
 
 export default function MainLayout({
   children,
@@ -6,8 +7,10 @@ export default function MainLayout({
   children: React.ReactNode
 }) {
   return (
-    <Shell>
-      {children}
-    </Shell>
+    <AuthGuard>
+      <Shell>
+        {children}
+      </Shell>
+    </AuthGuard>
   )
 }
