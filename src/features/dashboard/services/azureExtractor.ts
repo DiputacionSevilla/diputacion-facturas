@@ -36,7 +36,7 @@ export async function extractWithAzure(formData: FormData): Promise<AzureExtract
 
     try {
         validateConfig();
-        
+
         // 1. Enviar el documento para análisis
         // Limpiar el endpoint para asegurar que no termina en / y que tiene el formato correcto
         const baseUrl = AZURE_ENDPOINT.endsWith('/') ? AZURE_ENDPOINT.slice(0, -1) : AZURE_ENDPOINT;
@@ -131,18 +131,34 @@ export async function extractWithAzure(formData: FormData): Promise<AzureExtract
             }
         };
 
+        // Extraer todos los ítems para construir el concepto resumen
+        const items = fields.Items?.valueArray || [];
+        const descriptions = items
+            .map((item: any) => {
+                const desc = item.valueObject?.Description;
+                return (desc?.valueString || desc?.content || "").trim();
+            })
+            .filter((v: string) => v.length > 0);
+
+        // Eliminar duplicados consecutivos (falsos positivos de OCR)
+        const uniqueDescriptions = descriptions.filter((v: string, i: number) => i === 0 || v !== descriptions[i - 1]);
+
+        const conceptSummary = uniqueDescriptions.length > 0
+            ? uniqueDescriptions.join("; ").substring(0, 500)
+            : "Factura extraída por Azure AI";
+
         const data: AzureExtractorResponse = {
             registrationDate: new Date().toLocaleDateString('es-ES'),
             invoiceDate: formatDate(getFieldValue(fields.InvoiceDate)),
             invoiceNumber: getFieldValue(fields.InvoiceId),
             supplierNIF: getFieldValue(fields.VendorTaxId)?.replace(/[^a-zA-Z0-9]/g, ''),
             supplierName: getFieldValue(fields.VendorName),
-            concept: getFieldValue(fields.Items)?.[0]?.valueObject?.Description?.valueString || "Factura extraída por Azure AI",
+            concept: conceptSummary,
             baseAmount: getFieldValue(fields.SubTotal) || 0,
             taxAmount: getFieldValue(fields.TotalTax) || 0,
             totalAmount: getFieldValue(fields.InvoiceTotal) || 0,
             discountAmount: 0,
-            taxPercent: 21 // Por defecto, o intentar extraer de campos específicos si existen
+            taxPercent: 21 // Por defecto
         };
 
         // Si tenemos total y base pero no impuesto, intentar calcularlo
