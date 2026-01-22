@@ -303,6 +303,13 @@ test('should calculate total with tax', () => {
 
 > Esta sección CRECE con cada error encontrado.
 
+### 2026-01-22: Error "Body exceeded 1 MB limit" en Server Actions
+- **Error**: Next.js limita las Server Actions a 1MB por defecto. Al enviar PDFs grandes a Azure, falla con un error 413.
+- **Fix**: Aumentar `experimental.serverActions.bodySizeLimit` en `next.config.ts`.
+- **Aplicar en**: Features que requieran subida de archivos pesados vía Server Actions.
+
+---
+
 ### 2025-01-09: Usar npm run dev, no next dev
 - **Error**: Puerto hardcodeado causa conflictos
 - **Fix**: Siempre usar `npm run dev` (auto-detecta puerto)
