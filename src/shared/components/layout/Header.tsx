@@ -1,6 +1,6 @@
 "use client";
 
-import { Moon, Sun, User, Cpu, Cloud, FileSearch } from "lucide-react";
+import { Moon, Sun, User, Cpu, Cloud } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useInvoiceStore } from "@/features/dashboard/store/useInvoiceStore";
