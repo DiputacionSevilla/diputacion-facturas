@@ -34,7 +34,6 @@ export interface Invoice {
     status: InvoiceStatus;
     pdfFileName: string;
     pdfUrl?: string;
-    searchablePdfUrl?: string;  // PDF con texto buscable generado por Azure
     ocrText?: string;
     createdAt: string;
     updatedAt: string;

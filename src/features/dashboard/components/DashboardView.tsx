@@ -7,7 +7,7 @@ import { InvoiceCard } from "./InvoiceCard";
 import { PDFPreview } from "./PDFPreview";
 import { SideralModal } from "./SideralModal";
 import { Modal } from "@/shared/components/ui/Modal";
-import { Save, CheckCircle, GripVertical, Cloud, Upload, Loader2, RotateCcw, AlertTriangle, PanelLeft, PanelRight, Search, FileDown } from "lucide-react";
+import { Save, CheckCircle, GripVertical, Cloud, Upload, Loader2, RotateCcw, AlertTriangle, PanelLeft, PanelRight } from "lucide-react";
 import { getAreas } from "../services/areaService";
 import { processFileWithOCR } from "../services/ocrService";
 import { Invoice } from "@/shared/types/invoice.types";
@@ -22,12 +22,8 @@ export function DashboardView() {
         isProcessing,
         setIsProcessing,
         extractionSource,
-        generateSearchablePdf,
         clearAllInvoices,
-        invoices,
-        searchQuery,
-        setSearchQuery,
-        exportToCSV
+        invoices
     } = useInvoiceStore();
     const filteredInvoices = getFilteredInvoices();
 
@@ -63,7 +59,7 @@ export function DashboardView() {
         for (const file of acceptedFiles) {
             let ocrData: Partial<Invoice> = {};
             try {
-                ocrData = await processFileWithOCR(file, extractionSource, { generateSearchablePdf });
+                ocrData = await processFileWithOCR(file, extractionSource);
             } catch (error) {
                 console.error("Error processing file:", error);
                 ocrData = { hasErrors: true, concept: "Error de procesamiento." };
@@ -97,7 +93,7 @@ export function DashboardView() {
 
         addInvoices(newInvoices);
         setIsProcessing(false);
-    }, [addInvoices, setIsProcessing, extractionSource, generateSearchablePdf]);
+    }, [addInvoices, setIsProcessing, extractionSource]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -208,29 +204,7 @@ export function DashboardView() {
                                         {isPdfLeft ? <PanelRight className="w-3.5 h-3.5" /> : <PanelLeft className="w-3.5 h-3.5" />}
                                         <span className="uppercase">PDF {isPdfLeft ? "→" : "←"}</span>
                                     </button>
-
-                                    <button
-                                        onClick={() => exportToCSV()}
-                                        disabled={invoices.length === 0}
-                                        className="flex items-center gap-1.5 h-8 px-2 rounded text-[9px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-slate-200 dark:border-slate-700 disabled:opacity-50"
-                                        title="Exportar a CSV"
-                                    >
-                                        <FileDown className="w-3.5 h-3.5" />
-                                        <span className="uppercase">CSV</span>
-                                    </button>
                                 </div>
-                            </div>
-
-                            {/* Search bar */}
-                            <div className="relative group">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-colors" />
-                                <input
-                                    type="text"
-                                    placeholder="Buscar por Proveedor, NIF o Nº Factura..."
-                                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-sm"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
                             </div>
 
                             <div className="space-y-3">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useInvoiceStore } from "../store/useInvoiceStore";
-import { FileText, Download, Eye, Scan, FileImage, FileSearch } from "lucide-react";
+import { FileText, Download, Eye, Scan, FileImage } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useState } from "react";
 import { OCRDebugModal } from "./OCRDebugModal";
@@ -16,10 +16,8 @@ export function PDFPreview() {
     const [viewMode, setViewMode] = useState<ViewMode>("bounds");
 
     const hasBounds = selectedInvoice?.fieldBounds && Object.keys(selectedInvoice.fieldBounds).length > 0;
-    const hasSearchablePdf = !!selectedInvoice?.searchablePdfUrl;
-
-    // Usar el PDF searchable si está disponible, sino el original
-    const effectivePdfUrl = selectedInvoice?.searchablePdfUrl || selectedInvoice?.pdfUrl;
+    // Usar el PDF original
+    const effectivePdfUrl = selectedInvoice?.pdfUrl;
 
     if (!selectedInvoice) {
         return (
@@ -36,12 +34,6 @@ export function PDFPreview() {
                 <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase">
                     <FileText className="w-3.5 h-3.5" />
                     Doc: {selectedInvoice.pdfFileName || "Factura"}
-                    {hasSearchablePdf && (
-                        <span className="flex items-center gap-1 px-1.5 py-0.5 bg-primary/10 text-primary rounded text-[8px]" title="PDF con texto buscable">
-                            <FileSearch className="w-3 h-3" />
-                            Buscable
-                        </span>
-                    )}
                 </div>
                 <div className="flex items-center gap-2 text-slate-400">
                     {/* Toggle de modo de visualización */}
@@ -104,9 +96,9 @@ export function PDFPreview() {
                     </a>
                     <a
                         href={effectivePdfUrl}
-                        download={hasSearchablePdf ? `searchable_${selectedInvoice.pdfFileName}` : selectedInvoice.pdfFileName || "factura.pdf"}
+                        download={selectedInvoice.pdfFileName || "factura.pdf"}
                         className="hover:text-slate-600 transition-colors"
-                        title={hasSearchablePdf ? "Descargar PDF buscable" : "Descargar PDF"}
+                        title="Descargar PDF"
                     >
                         <Download className="w-3.5 h-3.5 cursor-pointer" />
                     </a>

@@ -26,8 +26,6 @@ export interface AzureExtractorResponse {
     fieldBounds?: Record<string, BoundingBox>;
     // Dimensiones de las páginas del documento
     pagesDimensions?: Array<{ width: number; height: number; unit: string }>;
-    // PDF con texto buscable (base64 data URL)
-    searchablePdfUrl?: string;
 }
 
 const AZURE_ENDPOINT = process.env.AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT || "";
@@ -43,95 +41,14 @@ function validateConfig() {
     }
 }
 
-/**
- * Genera un PDF con texto buscable usando el modelo prebuilt-read de Azure
- * Este PDF mantiene la imagen original pero añade una capa de texto invisible
- */
-async function generateSearchablePdfFromAzure(fileContent: ArrayBuffer, contentType: string): Promise<string | undefined> {
-    const baseUrl = AZURE_ENDPOINT.endsWith('/') ? AZURE_ENDPOINT.slice(0, -1) : AZURE_ENDPOINT;
 
-    // Usar prebuilt-read con output=pdf para generar PDF searchable
-    const analyzeUrl = `${baseUrl}/formrecognizer/documentModels/prebuilt-read:analyze?output=pdf&api-version=2024-11-30`;
-
-    console.log("[Azure AI] Llamando a prebuilt-read para PDF searchable...");
-
-    const response = await fetch(analyzeUrl, {
-        method: "POST",
-        headers: {
-            "Ocp-Apim-Subscription-Key": AZURE_KEY,
-            "Content-Type": contentType || "application/pdf"
-        },
-        body: fileContent
-    });
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Error de Azure prebuilt-read: ${response.status} - ${errorText}`);
-    }
-
-    const operationLocation = response.headers.get("operation-location");
-    if (!operationLocation) {
-        throw new Error("No se recibió la ubicación de la operación para PDF searchable.");
-    }
-
-    // Polling para esperar el resultado
-    let result: any = null;
-    let attempts = 0;
-    const maxAttempts = 30; // Más tiempo porque genera el PDF
-
-    while (attempts < maxAttempts) {
-        const resultResponse = await fetch(operationLocation, {
-            headers: { "Ocp-Apim-Subscription-Key": AZURE_KEY }
-        });
-
-        if (!resultResponse.ok) {
-            throw new Error("Error al obtener el PDF searchable de Azure.");
-        }
-
-        result = await resultResponse.json();
-
-        if (result.status === "succeeded") {
-            break;
-        } else if (result.status === "failed") {
-            throw new Error(`Azure falló al generar PDF searchable: ${JSON.stringify(result.error)}`);
-        }
-
-        attempts++;
-        await new Promise(resolve => setTimeout(resolve, 2000));
-    }
-
-    if (!result || result.status !== "succeeded") {
-        throw new Error("Tiempo de espera agotado para PDF searchable.");
-    }
-
-    // El PDF viene en base64 en analyzeResult.pdf.content
-    // Nota: La estructura puede variar según la versión de la API
-    console.log("[Azure AI] Estructura de respuesta:", JSON.stringify(Object.keys(result.analyzeResult || {})));
-
-    const pdfContent = result.analyzeResult?.pdf;
-    console.log("[Azure AI] Contenido PDF:", pdfContent ? `encontrado (keys: ${Object.keys(pdfContent)})` : "no encontrado");
-
-    const pdfBase64 = pdfContent?.content;
-    if (!pdfBase64) {
-        console.warn("[Azure AI] No se recibió el PDF searchable en la respuesta.");
-        console.warn("[Azure AI] analyzeResult.pdf:", JSON.stringify(pdfContent));
-        return undefined;
-    }
-
-    console.log("[Azure AI] PDF base64 recibido, longitud:", pdfBase64.length);
-
-    // Convertir a data URL para poder usarlo directamente
-    return `data:application/pdf;base64,${pdfBase64}`;
-}
 
 
 export async function extractWithAzure(formData: FormData): Promise<AzureExtractorResponse> {
     const file = formData.get("file") as File;
-    const generateSearchablePdf = formData.get("generateSearchablePdf") === "true";
     if (!file) throw new Error("No se ha proporcionado ningún archivo.");
 
     console.log(`[Azure AI] Procesando factura: ${file.name} (${file.size} bytes)`);
-    console.log(`[Azure AI] Generar PDF searchable: ${generateSearchablePdf}`);
 
     try {
         validateConfig();
@@ -311,20 +228,7 @@ export async function extractWithAzure(formData: FormData): Promise<AzureExtract
             data.taxPercent = 21; // Por defecto
         }
 
-        // Si se solicita, generar PDF searchable con prebuilt-read
-        if (generateSearchablePdf) {
-            try {
-                console.log("[Azure AI] Generando PDF searchable...");
-                const searchablePdfUrl = await generateSearchablePdfFromAzure(fileContent, file.type);
-                if (searchablePdfUrl) {
-                    data.searchablePdfUrl = searchablePdfUrl;
-                    console.log("[Azure AI] PDF searchable generado correctamente.");
-                }
-            } catch (pdfError) {
-                console.error("[Azure AI] Error al generar PDF searchable:", pdfError);
-                // No lanzamos error, simplemente continuamos sin el PDF searchable
-            }
-        }
+
 
         console.log("[Azure AI] Datos extraídos:", data);
         return data;

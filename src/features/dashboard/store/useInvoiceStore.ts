@@ -14,7 +14,6 @@ interface InvoiceState {
     selectedEntityName: string | null;
     userName: string | null;
     extractionSource: 'tesseract' | 'azure';
-    generateSearchablePdf: boolean;
 
     // Actions
     setInvoices: (invoices: Invoice[]) => void;
@@ -31,7 +30,6 @@ interface InvoiceState {
     setSelectedEntity: (code: string | null, name: string | null) => void;
     setUserName: (name: string | null) => void;
     setExtractionSource: (source: 'tesseract' | 'azure') => void;
-    setGenerateSearchablePdf: (value: boolean) => void;
 
     // Selectors
     getSelectedInvoice: () => Invoice | undefined;
@@ -51,7 +49,6 @@ export const useInvoiceStore = create<InvoiceState>()(
             selectedEntityName: null as string | null,
             userName: null as string | null,
             extractionSource: 'tesseract' as 'tesseract' | 'azure',
-            generateSearchablePdf: false as boolean,
 
             setInvoices: (invoices: Invoice[]) => set({ invoices }),
 
@@ -63,25 +60,7 @@ export const useInvoiceStore = create<InvoiceState>()(
                 invoices: state.invoices.map((inv: Invoice) => {
                     if (inv.id !== id) return inv;
 
-                    // Aplicar las actualizaciones iniciales
-                    let updated = { ...inv, ...updates, updatedAt: new Date().toISOString() };
-
-                    // Lógica de recalcular importes
-                    if ('baseAmount' in updates || 'taxPercent' in updates) {
-                        // Si cambia la base o el %, recalculamos impuesto y total
-                        updated.taxAmount = +(updated.baseAmount * (updated.taxPercent / 100)).toFixed(2);
-                        updated.totalAmount = +(updated.baseAmount + updated.taxAmount - (updated.discountAmount || 0)).toFixed(2);
-                    } else if ('totalAmount' in updates) {
-                        // Si cambia el total, intentamos ajustar la base (asumiendo que el % es correcto)
-                        updated.baseAmount = +(updated.totalAmount / (1 + updated.taxPercent / 100)).toFixed(2);
-                        updated.taxAmount = +(updated.totalAmount - updated.baseAmount).toFixed(2);
-                    } else if ('taxAmount' in updates) {
-                        // Si cambia el importe del impuesto directamente, ajustamos el total
-                        updated.totalAmount = +(updated.baseAmount + updated.taxAmount - (updated.discountAmount || 0)).toFixed(2);
-                    } else if ('discountAmount' in updates) {
-                        // Si cambia el descuento, ajustamos el total
-                        updated.totalAmount = +(updated.baseAmount + updated.taxAmount - updated.discountAmount).toFixed(2);
-                    }
+                    const updated = { ...inv, ...updates, updatedAt: new Date().toISOString() };
 
                     // Validar con Zod
                     const validation = InvoiceSchema.safeParse(updated);
@@ -133,8 +112,6 @@ export const useInvoiceStore = create<InvoiceState>()(
             setUserName: (name: string | null) => set({ userName: name }),
 
             setExtractionSource: (source: 'tesseract' | 'azure') => set({ extractionSource: source }),
-
-            setGenerateSearchablePdf: (value: boolean) => set({ generateSearchablePdf: value }),
 
             getSelectedInvoice: () => {
                 const { invoices, selectedInvoiceId } = get();

@@ -9,8 +9,6 @@ export function Header() {
     const [isDark, setIsDark] = useState(false);
     const extractionSource = useInvoiceStore((state) => state.extractionSource);
     const setExtractionSource = useInvoiceStore((state) => state.setExtractionSource);
-    const generateSearchablePdf = useInvoiceStore((state) => state.generateSearchablePdf);
-    const setGenerateSearchablePdf = useInvoiceStore((state) => state.setGenerateSearchablePdf);
     const selectedEntityName = useInvoiceStore((state) => state.selectedEntityName);
     const userName = useInvoiceStore((state) => state.userName);
 
@@ -78,21 +76,7 @@ export function Header() {
                         </button>
                     </div>
 
-                    {/* Toggle PDF Searchable - Solo visible con Azure */}
-                    {extractionSource === 'azure' && (
-                        <button
-                            onClick={() => setGenerateSearchablePdf(!generateSearchablePdf)}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${generateSearchablePdf
-                                ? 'bg-primary/10 border-primary/30 text-primary dark:bg-primary/20'
-                                : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                                }`}
-                            title="Generar PDF con texto buscable (doble llamada a Azure)"
-                        >
-                            <FileSearch className="w-3.5 h-3.5" />
-                            <span>PDF Buscable</span>
-                            <div className={`w-2 h-2 rounded-full ${generateSearchablePdf ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600'}`} />
-                        </button>
-                    )}
+
 
                     <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
 
