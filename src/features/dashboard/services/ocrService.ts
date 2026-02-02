@@ -2,13 +2,22 @@ import { createWorker } from 'tesseract.js';
 import { Invoice } from '@/shared/types/invoice.types';
 import { extractWithAzure } from './azureExtractor';
 
-export async function processFileWithOCR(file: File, source: 'tesseract' | 'azure'): Promise<Partial<Invoice>> {
+interface OCROptions {
+    generateSearchablePdf?: boolean;
+}
+
+export async function processFileWithOCR(
+    file: File,
+    source: 'tesseract' | 'azure',
+    options: OCROptions = {}
+): Promise<Partial<Invoice>> {
     try {
         if (typeof window === 'undefined') return {};
 
         if (source === 'azure') {
             const formData = new FormData();
             formData.append("file", file);
+            formData.append("generateSearchablePdf", String(options.generateSearchablePdf || false));
             const azureData = await extractWithAzure(formData);
             return {
                 ...azureData,

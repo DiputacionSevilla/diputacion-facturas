@@ -6,6 +6,7 @@ import { useInvoiceStore } from "../store/useInvoiceStore";
 import { Trash2, AlertTriangle, Calendar } from "lucide-react";
 import { useState, useRef } from "react";
 import { Modal } from "@/shared/components/ui/Modal";
+import { Tooltip } from "@/shared/components/ui/Tooltip";
 
 interface Props {
     invoice: Invoice;
@@ -145,7 +146,9 @@ export function InvoiceCard({ invoice }: Props) {
                         </div>
                         <div className="space-y-1">
                             <label className="block text-[8px] font-bold text-slate-400 uppercase">Concepto Resumen</label>
-                            <input className="editable-input" type="text" value={invoice.concept} onChange={(e) => handleChange("concept", e.target.value)} />
+                            <Tooltip content={invoice.concept} maxWidth={500}>
+                                <input className="editable-input" type="text" value={invoice.concept} onChange={(e) => handleChange("concept", e.target.value)} />
+                            </Tooltip>
                         </div>
                     </div>
 

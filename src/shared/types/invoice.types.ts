@@ -1,5 +1,16 @@
 export type InvoiceStatus = 'pending' | 'validated' | 'exported';
 
+export interface BoundingBox {
+    pageNumber: number;
+    polygon: number[]; // [x1, y1, x2, y2, x3, y3, x4, y4]
+}
+
+export interface PageDimension {
+    width: number;
+    height: number;
+    unit: string;
+}
+
 export interface Invoice {
     id: string;
 
@@ -23,10 +34,15 @@ export interface Invoice {
     status: InvoiceStatus;
     pdfFileName: string;
     pdfUrl?: string;
+    searchablePdfUrl?: string;  // PDF con texto buscable generado por Azure
     ocrText?: string;
     createdAt: string;
     updatedAt: string;
     hasErrors?: boolean;
     errors?: Record<string, string>;
     selected?: boolean;
+
+    // Bounding boxes para visualización sobre el PDF
+    fieldBounds?: Record<string, BoundingBox>;
+    pagesDimensions?: PageDimension[];
 }
