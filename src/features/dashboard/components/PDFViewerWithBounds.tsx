@@ -190,13 +190,12 @@ export function PDFViewerWithBounds({ pdfUrl, fieldBounds, pagesDimensions, onFi
                                 <div
                                     key={fieldName}
                                     className={cn(
-                                        "flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium cursor-pointer transition-all",
-                                        hoveredField === fieldName ? "ring-2 ring-offset-1" : ""
+                                        "flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium cursor-pointer transition-all"
                                     )}
                                     style={{
                                         backgroundColor: colors.fill,
                                         color: colors.stroke,
-                                        ringColor: colors.stroke,
+                                        boxShadow: hoveredField === fieldName ? `0 0 0 2px ${colors.stroke}` : undefined,
                                     }}
                                     onMouseEnter={() => setHoveredField(fieldName)}
                                     onMouseLeave={() => setHoveredField(null)}
